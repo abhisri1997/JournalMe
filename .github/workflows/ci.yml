@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start Postgres (Docker)
+        run: |
+          docker run -d --name journalme-test-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=journalme_test -p 5432:5432 postgres:15
+          sleep 5
+
+      - name: Run backend integration tests
+        run: |
+          npm --workspace @journalme/backend run test:integration
+
+      - name: Run frontend tests
+        run: |
+          npm --workspace @journalme/frontend run test --silent
+
+      - name: Stop Postgres
+        if: always()
+        run: docker stop journalme-test-db && docker rm journalme-test-db

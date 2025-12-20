@@ -1,0 +1,366 @@
+:root {
+  --bg: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --card: #f8fafc;
+}
+
+[data-theme="dark"] {
+  --bg: #0b1220;
+  --text: #e6eef8;
+  --muted: #94a3b8;
+  --card: #071127;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
+}
+
+input,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+textarea {
+  padding: 8px;
+  border: 1px solid #e6eef8;
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+}
+
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.site-container {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Visually hidden but accessible */
+.sr-only {
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.nav-left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.logo-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.logo-text {
+  line-height: 1;
+}
+
+.nav-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  color: var(--text);
+}
+
+.nav-links a[aria-current="page"] {
+  color: var(--text);
+  font-weight: 600;
+  border-bottom: 2px solid #2563eb;
+}
+
+.nav-links .icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Hide menu button on wide screens */
+.menu-button {
+  display: none;
+}
+
+.journal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.journal-textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  font-size: 1rem;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.controls {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.entry-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.entry {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+button:focus {
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+}
+
+.welcome-card {
+  background: var(--card);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.welcome-title {
+  margin: 0 0 6px 0;
+}
+
+.welcome-text {
+  color: var(--muted);
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.divider {
+  margin: 24px 0;
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Mobile/tablet navigation adjustments */
+@media (max-width: 900px) {
+  .site-container {
+    padding: 16px;
+  }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: nowrap;
+  }
+
+  .nav-left {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .logo {
+    white-space: nowrap;
+    margin-bottom: 0;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Show menu button on narrow screens */
+  .menu-button {
+    display: inline-flex;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+
+  /* Hide nav links until menu is opened */
+  .nav-links {
+    display: none;
+    width: 100%;
+  }
+
+  .nav-links.open {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  main {
+    padding: 12px;
+  }
+
+  main h1 {
+    font-size: 1.75rem;
+    margin-bottom: 24px;
+  }
+
+  main h2 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    margin-top: 0;
+  }
+
+  main input[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  main small {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+  }
+
+  main > div > div {
+    margin-bottom: 16px;
+  }
+
+  .journal-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .journal-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    flex: 1;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .journal-textarea {
+    width: 100%;
+    min-height: 120px;
+    margin-bottom: 12px;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .controls button {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  select {
+    width: 100%;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+  }
+
+  .welcome-card {
+    padding: 12px;
+  }
+
+  .entry {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .entry-list {
+    padding: 0;
+  }
+
+  section h2 {
+    margin: 20px 0 12px 0;
+    font-size: 1.25rem;
+  }
+}
