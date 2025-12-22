@@ -3,6 +3,7 @@ import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import fs from "fs";
+import { AuthRequest } from "../middleware/auth";
 
 const router = express.Router();
 
@@ -30,12 +31,16 @@ import prisma from "../db";
 router.post(
   "/",
   upload.single("audio"),
-  async (req: express.Request, res: express.Response) => {
+  async (req: AuthRequest, res: express.Response) => {
     try {
       const { text } = req.body || {};
-      const reqWithFile = req as express.Request & {
+      const reqWithFile = req as AuthRequest & {
         file?: Express.Multer.File;
       };
+
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
 
       console.log("POST /journals - Received request");
       console.log("Text:", text);
@@ -55,6 +60,7 @@ router.post(
       const audioFilename = reqWithFile.file?.filename;
       const created = await prisma.journalEntry.create({
         data: {
+          userId: req.user.id,
           text: text ?? "",
           audioPath: audioFilename,
         },
@@ -69,26 +75,42 @@ router.post(
   }
 );
 
-router.get("/", async (_req, res) => {
+router.get("/", async (req: AuthRequest, res: express.Response) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
   const data = await prisma.journalEntry.findMany({
+    where: { userId: req.user.id },
     orderBy: { createdAt: "desc" },
   });
   return res.json(data);
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req: AuthRequest, res: express.Response) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
   const entry = await prisma.journalEntry.findUnique({
     where: { id: req.params.id },
   });
   if (!entry) return res.status(404).json({ error: "Not found" });
+  if (entry.userId !== req.user.id) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
   return res.json(entry);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req: AuthRequest, res: express.Response) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
   const entry = await prisma.journalEntry.findUnique({
     where: { id: req.params.id },
   });
   if (!entry) return res.status(404).json({ error: "Not found" });
+  if (entry.userId !== req.user.id) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
   // remove audio file if it exists
   if (entry.audioPath) {
     const p = path.join(uploadsDir, entry.audioPath);

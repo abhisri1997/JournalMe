@@ -70,7 +70,30 @@ export default function Register() {
 
   return (
     <main style={{ padding: 24, maxWidth: 640, margin: "0 auto" }}>
-      <h1>Register</h1>
+      <div
+        style={{
+          marginBottom: 24,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <h1 style={{ margin: 0 }}>Register</h1>
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            padding: "8px 12px",
+            backgroundColor: "transparent",
+            border: "1px solid var(--border)",
+            borderRadius: "4px",
+            cursor: "pointer",
+            color: "var(--text)",
+            fontSize: "0.9rem",
+          }}
+        >
+          Home
+        </button>
+      </div>
       {error && (
         <div
           style={{
@@ -100,6 +123,23 @@ export default function Register() {
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={submit} disabled={loading}>
             {loading ? "Registering..." : "Register"}
+          </button>
+        </div>
+        <div style={{ marginTop: 16, textAlign: "center", fontSize: "0.9rem" }}>
+          Already have an account?{" "}
+          <button
+            onClick={() => navigate("/login")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--primary, #007bff)",
+              cursor: "pointer",
+              textDecoration: "underline",
+              padding: 0,
+              font: "inherit",
+            }}
+          >
+            Login here
           </button>
         </div>
       </div>

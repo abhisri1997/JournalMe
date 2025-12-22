@@ -7,6 +7,7 @@ const router = express.Router();
 // Get current user profile
 router.get("/me", authenticate, async (req: AuthRequest, res) => {
   try {
+    debugger; // <-- Debugger will stop here
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });

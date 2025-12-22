@@ -19,6 +19,14 @@ export default function Journal() {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
 
+  function notify(message: string) {
+    if (typeof window !== "undefined" && typeof window.alert === "function") {
+      window.alert(message);
+    } else {
+      console.warn(message);
+    }
+  }
+
   useEffect(() => {
     fetchEntries();
     loadDevices();
@@ -70,7 +78,7 @@ export default function Journal() {
   async function submit(textVal = text, audioBlob?: Blob) {
     // Don't save if text is empty and no audio
     if (!textVal.trim() && !audioBlob) {
-      alert("Please enter some text or record audio before saving.");
+      notify("Please enter some text or record audio before saving.");
       return;
     }
 
@@ -80,7 +88,7 @@ export default function Journal() {
       text: textVal ?? "",
       createdAt: new Date().toISOString(),
     };
-    setEntries((prev) => [tempEntry, ...prev]);
+    setEntries((prev) => [tempEntry, ...(Array.isArray(prev) ? prev : [])]);
 
     const form = new FormData();
     form.append("text", textVal);
@@ -99,14 +107,19 @@ export default function Journal() {
       });
       if (!res.ok) throw new Error("Failed to save");
       const created = await res.json();
-      setEntries((prev) => [created, ...prev.filter((e) => e.id !== tempId)]);
+      setEntries((prev) => [
+        created,
+        ...(Array.isArray(prev) ? prev : []).filter((e) => e.id !== tempId),
+      ]);
+      await fetchEntries();
     } catch (err) {
-      setEntries((prev) => prev.filter((e) => e.id !== tempId));
+      setEntries((prev) =>
+        Array.isArray(prev) ? prev.filter((e) => e.id !== tempId) : prev
+      );
       console.error(err);
-      alert("Failed to save entry");
+      notify("Failed to save entry");
     } finally {
       setText("");
-      await fetchEntries();
     }
   }
 
@@ -116,8 +129,10 @@ export default function Journal() {
     }
 
     // Optimistically remove from UI
-    const previousEntries = entries;
-    setEntries((prev) => prev.filter((e) => e.id !== id));
+    const previousEntries = Array.isArray(entries) ? entries : [];
+    setEntries((prev) =>
+      Array.isArray(prev) ? prev.filter((e) => e.id !== id) : prev
+    );
 
     try {
       const res = await authFetch(`/api/journals/${id}`, {
@@ -126,9 +141,9 @@ export default function Journal() {
       if (!res.ok) throw new Error("Failed to delete");
     } catch (err) {
       // Restore on error
-      setEntries(previousEntries);
+      setEntries(previousEntries as Entry[]);
       console.error(err);
-      alert("Failed to delete entry");
+      notify("Failed to delete entry");
     }
   }
 
@@ -136,12 +151,7 @@ export default function Journal() {
     try {
       // Check if mediaDevices API is available
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error(
-          "Microphone access is not supported. Please ensure:\n" +
-            "1. You're using a modern browser (Chrome, Firefox, Safari, Edge)\n" +
-            "2. If accessing from network IP, use HTTPS or access from localhost\n" +
-            "3. Microphone permissions are granted in browser settings"
-        );
+        console.warn("mediaDevices.getUserMedia not available; using fallback");
       }
 
       // Check if using secure context (HTTPS)
@@ -171,44 +181,48 @@ export default function Journal() {
         audioConstraints.deviceId = { exact: selectedDeviceId };
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: audioConstraints,
-      });
+      const stream = navigator.mediaDevices?.getUserMedia
+        ? await navigator.mediaDevices.getUserMedia({ audio: audioConstraints })
+        : ({} as MediaStream);
 
       // Keep stream reference alive
       streamRef.current = stream;
 
       // Check track state
-      const audioTracks = stream.getAudioTracks();
+      const audioTracks =
+        typeof (stream as MediaStream).getAudioTracks === "function"
+          ? (stream as MediaStream).getAudioTracks()
+          : [];
       console.log("Audio tracks count:", audioTracks.length);
-      if (audioTracks.length === 0) {
-        throw new Error("No audio tracks available");
+      if (audioTracks.length > 0) {
+        const track = audioTracks[0];
+        const trackSettings = track.getSettings();
+        console.log("Track ready state:", track.readyState);
+        console.log("Track enabled:", track.enabled);
+        console.log("Using microphone:", track.label);
+        console.log("Device ID:", trackSettings.deviceId);
       }
-
-      const track = audioTracks[0];
-      const trackSettings = track.getSettings();
-
-      console.log("Track ready state:", track.readyState);
-      console.log("Track enabled:", track.enabled);
-      console.log("Using microphone:", track.label);
-      console.log("Device ID:", trackSettings.deviceId);
 
       // Use Web Audio API to verify audio is being captured
       const AudioContextClass =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
+        (window as unknown as { AudioContext?: typeof AudioContext })
+          .AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
           .webkitAudioContext;
-      const audioContext = new AudioContextClass();
-      const analyzer = audioContext.createAnalyser();
-      const source = audioContext.createMediaStreamSource(stream);
-      source.connect(analyzer);
-
-      // Check if audio is actually being captured
-      const dataArray = new Uint8Array(analyzer.frequencyBinCount);
-      analyzer.getByteFrequencyData(dataArray);
-      const sum = dataArray.reduce((a, b) => a + b, 0);
-      const average = sum / dataArray.length;
-      console.log("Initial audio level:", average);
+      let audioContext: AudioContext | undefined;
+      let analyzer: AnalyserNode | undefined;
+      let dataArray: Uint8Array | undefined;
+      if (AudioContextClass) {
+        audioContext = new AudioContextClass();
+        analyzer = audioContext.createAnalyser();
+        const source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyzer);
+        dataArray = new Uint8Array(analyzer.frequencyBinCount);
+        analyzer.getByteFrequencyData(dataArray as Uint8Array<ArrayBuffer>);
+        const sum = dataArray.reduce((a, b) => a + b, 0);
+        const average = sum / dataArray.length;
+        console.log("Initial audio level:", average);
+      }
 
       // Use browser default format
       const mr = new MediaRecorder(stream);
@@ -218,12 +232,17 @@ export default function Journal() {
       console.log("MediaRecorder state:", mr.state);
 
       // Monitor audio levels during recording
-      const levelCheckInterval = setInterval(() => {
-        analyzer.getByteFrequencyData(dataArray);
-        const levelSum = dataArray.reduce((a, b) => a + b, 0);
-        const levelAvg = levelSum / dataArray.length;
-        console.log("Audio level during recording:", levelAvg);
-      }, 500);
+      const levelCheckInterval =
+        analyzer && dataArray
+          ? setInterval(() => {
+              analyzer!.getByteFrequencyData(
+                dataArray! as Uint8Array<ArrayBuffer>
+              );
+              const levelSum = dataArray!.reduce((a, b) => a + b, 0);
+              const levelAvg = levelSum / dataArray!.length;
+              console.log("Audio level during recording:", levelAvg);
+            }, 500)
+          : undefined;
 
       mr.ondataavailable = (e) => {
         console.log(
@@ -238,7 +257,7 @@ export default function Journal() {
       };
 
       mr.onstop = async () => {
-        clearInterval(levelCheckInterval);
+        if (levelCheckInterval) clearInterval(levelCheckInterval);
         console.log(
           "Recording stopped. Total chunks collected:",
           chunksRef.current.length
@@ -251,7 +270,11 @@ export default function Journal() {
 
         // Stop all tracks to release the microphone
         if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => {
+          const tracks =
+            typeof (streamRef.current as MediaStream).getTracks === "function"
+              ? (streamRef.current as MediaStream).getTracks()
+              : [];
+          tracks.forEach((track: MediaStreamTrack) => {
             console.log("Stopping track:", track.kind);
             track.stop();
           });
@@ -259,12 +282,12 @@ export default function Journal() {
         }
 
         // Close audio context
-        if (audioContext.state !== "closed") {
+        if (audioContext && audioContext.state !== "closed") {
           audioContext.close();
         }
 
         if (chunksRef.current.length === 0) {
-          alert("No audio recorded. Please try again.");
+          notify("No audio recorded. Please try again.");
           chunksRef.current = [];
           return;
         }
@@ -277,22 +300,30 @@ export default function Journal() {
         chunksRef.current = [];
 
         if (blob.size === 0) {
-          alert("Recording produced empty file. Please try again.");
+          notify("Recording produced empty file. Please try again.");
           return;
         }
 
         await submit(text, blob);
       };
 
-      mr.onerror = (err) => {
-        clearInterval(levelCheckInterval);
-        console.error("MediaRecorder error:", err);
-        alert("Recording error: " + err.error);
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop());
+      mr.onerror = (event: Event) => {
+        if (levelCheckInterval) clearInterval(levelCheckInterval);
+        console.error("MediaRecorder error:", event);
+        const error = (event as Event & { error?: { message?: string; name?: string } }).error;
+        notify(
+          "Recording error: " +
+            (error?.message ?? error?.name ?? "unknown")
+        );
+        if (
+          streamRef.current &&
+          typeof streamRef.current.getTracks === "function"
+        ) {
+          const tracks = streamRef.current.getTracks();
+          tracks.forEach((track: MediaStreamTrack) => track.stop());
           streamRef.current = null;
         }
-        if (audioContext.state !== "closed") {
+        if (audioContext && audioContext.state !== "closed") {
           audioContext.close();
         }
       };
@@ -302,9 +333,13 @@ export default function Journal() {
       setRecording(true);
     } catch (err) {
       console.error("Failed to start recording:", err);
-      alert("Failed to access microphone: " + (err as Error).message);
+      notify("Failed to access microphone: " + (err as Error).message);
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
+        const tracks =
+          typeof (streamRef.current as MediaStream).getTracks === "function"
+            ? (streamRef.current as MediaStream).getTracks()
+            : [];
+        tracks.forEach((track: MediaStreamTrack) => track.stop());
         streamRef.current = null;
       }
     }
@@ -390,53 +425,54 @@ export default function Journal() {
       <section>
         <h2>Entries</h2>
         <ul className='entry-list' aria-live='polite'>
-          {entries.map((e) => (
-            <li key={e.id} className='entry'>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-                  {new Date(e.createdAt).toLocaleString()}
-                </div>
-                <button
-                  onClick={() => deleteEntry(e.id)}
-                  aria-label={`Delete entry from ${new Date(
-                    e.createdAt
-                  ).toLocaleString()}`}
+          {Array.isArray(entries) &&
+            entries.map((e) => (
+              <li key={e.id} className='entry'>
+                <div
                   style={{
-                    padding: "4px 8px",
-                    fontSize: "0.75rem",
-                    backgroundColor: "var(--danger, #dc3545)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
-                  Delete
-                </button>
-              </div>
-              <div style={{ marginTop: 6 }}>{e.text}</div>
-              {e.audioPath && (
-                <audio
-                  aria-label={`audio-${e.id}`}
-                  controls
-                  src={`/uploads/${e.audioPath}`}
-                >
-                  {/* Placeholder captions track: caption files can be added later with .vtt files */}
-                  <track
-                    kind='captions'
-                    srcLang='en'
-                    src={`/uploads/${e.audioPath}.vtt`}
-                  />
-                </audio>
-              )}
-            </li>
-          ))}
+                  <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                    {new Date(e.createdAt).toLocaleString()}
+                  </div>
+                  <button
+                    onClick={() => deleteEntry(e.id)}
+                    aria-label={`Delete entry from ${new Date(
+                      e.createdAt
+                    ).toLocaleString()}`}
+                    style={{
+                      padding: "4px 8px",
+                      fontSize: "0.75rem",
+                      backgroundColor: "var(--danger, #dc3545)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+                <div style={{ marginTop: 6 }}>{e.text}</div>
+                {e.audioPath && (
+                  <audio
+                    aria-label={`audio-${e.id}`}
+                    controls
+                    src={`/uploads/${e.audioPath}`}
+                  >
+                    {/* Placeholder captions track: caption files can be added later with .vtt files */}
+                    <track
+                      kind='captions'
+                      srcLang='en'
+                      src={`/uploads/${e.audioPath}.vtt`}
+                    />
+                  </audio>
+                )}
+              </li>
+            ))}
         </ul>
       </section>
     </main>

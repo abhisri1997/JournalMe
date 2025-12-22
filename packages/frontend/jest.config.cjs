@@ -1,11 +1,11 @@
 module.exports = {
   preset: "ts-jest",
-  testEnvironment: "node",
+  testEnvironment: "jsdom",
   transform: {
     "^.+\\.(ts|tsx)$": "babel-jest",
     "^.+\\.(js|jsx)$": "babel-jest",
   },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
-  testPathIgnorePatterns: ["/node_modules/"],
-  testMatch: ["**/__tests__/**/*.test.ts"],
+  testPathIgnorePatterns: ["/node_modules/", "/e2e/"],
+  setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
 };

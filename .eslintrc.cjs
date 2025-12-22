@@ -7,6 +7,7 @@ module.exports = {
       "./packages/frontend/tsconfig.json",
       "./packages/frontend/tsconfig.eslint.json",
       "./packages/backend/tsconfig.json",
+      "./packages/backend/tsconfig.eslint.json",
     ],
     sourceType: "module",
   },

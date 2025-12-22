@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,7 +40,30 @@ export default function Login() {
 
   return (
     <main style={{ padding: 24, maxWidth: 640, margin: "0 auto" }}>
-      <h1>Login</h1>
+      <div
+        style={{
+          marginBottom: 24,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <h1 style={{ margin: 0 }}>Login</h1>
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            padding: "8px 12px",
+            backgroundColor: "transparent",
+            border: "1px solid var(--border)",
+            borderRadius: "4px",
+            cursor: "pointer",
+            color: "var(--text)",
+            fontSize: "0.9rem",
+          }}
+        >
+          Home
+        </button>
+      </div>
       <div style={{ display: "grid", gap: 8 }}>
         <input
           placeholder='Email'
@@ -57,6 +82,39 @@ export default function Login() {
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={submit} disabled={loading}>
             {loading ? "Logging in..." : "Login"}
+          </button>
+        </div>
+        <div style={{ marginTop: 16, textAlign: "center", fontSize: "0.9rem" }}>
+          Don't have an account?{" "}
+          <button
+            onClick={() => navigate("/register")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--primary, #007bff)",
+              cursor: "pointer",
+              textDecoration: "underline",
+              padding: 0,
+              font: "inherit",
+            }}
+          >
+            Register here
+          </button>
+        </div>
+        <div style={{ marginTop: 12, textAlign: "center", fontSize: "0.9rem" }}>
+          <button
+            onClick={() => navigate("/forgot-password")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--primary, #007bff)",
+              cursor: "pointer",
+              textDecoration: "underline",
+              padding: 0,
+              font: "inherit",
+            }}
+          >
+            Forgot password?
           </button>
         </div>
       </div>

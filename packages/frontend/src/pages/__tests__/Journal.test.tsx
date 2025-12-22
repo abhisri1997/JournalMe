@@ -19,26 +19,29 @@ test("saves text entry and shows it after server response", async () => {
     .spyOn(globalThis, "fetch")
     .mockImplementation((input, init) => {
       callCount++;
-      if (!init && callCount === 1) {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          json: async () => [],
-        } as Response);
-      }
-      if (init && (init as RequestInit).method === "POST") {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          json: async () => createdEntry,
-        } as Response);
-      }
-      if (!init) {
+      // GET request (no method or method is GET)
+      if (!init?.method || (init as RequestInit).method === "GET") {
+        if (callCount === 1) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => [],
+          } as unknown as Response);
+        }
+        // Subsequent GET calls return the created entry
         return Promise.resolve({
           ok: true,
           status: 200,
           json: async () => [createdEntry],
-        } as Response);
+        } as unknown as Response);
+      }
+      // POST request
+      if ((init as RequestInit).method === "POST") {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => createdEntry,
+        } as unknown as Response);
       }
       return Promise.resolve({
         ok: false,
@@ -90,25 +93,28 @@ test("can start and stop recording and the saved entry appears", async () => {
     .spyOn(globalThis, "fetch")
     .mockImplementation((input, init) => {
       callCount++;
-      if (!init && callCount === 1) {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          json: async () => [],
-        } as Response);
-      }
-      if (init && (init as RequestInit).method === "POST") {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          json: async () => createdEntry,
-        } as Response);
-      }
-      if (!init) {
+      // GET request (no method or method is GET)
+      if (!init?.method || (init as RequestInit).method === "GET") {
+        if (callCount === 1) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => [],
+          } as Response);
+        }
+        // Subsequent GET calls return the created entry
         return Promise.resolve({
           ok: true,
           status: 200,
           json: async () => [createdEntry],
+        } as Response);
+      }
+      // POST request
+      if ((init as RequestInit).method === "POST") {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => createdEntry,
         } as Response);
       }
       return Promise.resolve({

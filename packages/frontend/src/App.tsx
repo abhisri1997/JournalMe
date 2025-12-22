@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import ProfileMenu from "./components/ProfileMenu";
+import ThemeToggle from "./components/ThemeToggle";
 import { HomeIcon, JournalIcon, UserIcon } from "./components/Icons";
 import { getToken } from "./auth";
 
@@ -33,21 +34,15 @@ export default function App() {
             <NavLink to='/' end aria-label='Home'>
               <HomeIcon className='icon' /> Home
             </NavLink>
-            {isAuthed && (
-              <NavLink to='/journal' aria-label='Journal'>
-                <JournalIcon className='icon' /> Journal
-              </NavLink>
-            )}
-            {!isAuthed && (
-              <>
-                <NavLink to='/login' aria-label='Login'>
-                  <UserIcon className='icon' /> Login
-                </NavLink>
-                <NavLink to='/register' aria-label='Register'>
-                  <UserIcon className='icon' /> Register
-                </NavLink>
-              </>
-            )}
+            <NavLink to='/journal' aria-label='Journal'>
+              <JournalIcon className='icon' /> Journal
+            </NavLink>
+            <NavLink to='/login' aria-label='Login'>
+              <UserIcon className='icon' /> Login
+            </NavLink>
+            <NavLink to='/register' aria-label='Register'>
+              <UserIcon className='icon' /> Register
+            </NavLink>
           </div>
         </div>
         <div className='nav-right'>
@@ -60,6 +55,7 @@ export default function App() {
           >
             Menu
           </button>
+          <ThemeToggle />
           {isAuthed && <ProfileMenu />}
         </div>
       </nav>
