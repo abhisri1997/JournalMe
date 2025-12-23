@@ -74,7 +74,7 @@ export default function ResetPassword() {
         backButton={{ label: "Back to Login", to: "/login" }}
       />
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div className='flex flex-col gap-3'>
         {!token ? (
           <ErrorMessage message={error} />
         ) : (

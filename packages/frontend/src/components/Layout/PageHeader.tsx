@@ -13,27 +13,12 @@ export default function PageHeader({ title, backButton }: PageHeaderProps) {
   const navigate = useNavigate();
 
   return (
-    <div
-      style={{
-        marginBottom: 24,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <h1 style={{ margin: 0 }}>{title}</h1>
+    <div className='mb-6 flex items-center justify-between'>
+      <h1 className='m-0 text-2xl font-semibold'>{title}</h1>
       {backButton && (
         <button
           onClick={() => navigate(backButton.to)}
-          style={{
-            padding: "8px 12px",
-            backgroundColor: "transparent",
-            border: "1px solid var(--border)",
-            borderRadius: "4px",
-            cursor: "pointer",
-            color: "var(--text)",
-            fontSize: "0.9rem",
-          }}
+          className='rounded-md border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] text-sm'
         >
           {backButton.label}
         </button>

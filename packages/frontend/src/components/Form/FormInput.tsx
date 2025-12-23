@@ -38,7 +38,7 @@ export default function FormInput({
   return (
     <div>
       {label && (
-        <label htmlFor={id} style={{ display: "block", marginBottom: 4 }}>
+        <label htmlFor={id} className='mb-1 block'>
           {label}
         </label>
       )}
@@ -52,26 +52,14 @@ export default function FormInput({
         disabled={disabled}
         autoComplete={autocomplete}
         inputMode={inputMode}
-        style={{
-          width: "100%",
-          padding: "8px 12px",
-          border: "1px solid var(--border)",
-          borderRadius: "4px",
-          backgroundColor: disabled ? "var(--card)" : "var(--bg)",
-          color: "var(--text)",
-          boxSizing: "border-box",
-          opacity: disabled ? 0.6 : 1,
-          cursor: disabled ? "not-allowed" : "text",
-        }}
+        className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-[var(--text)] ${
+          disabled
+            ? "bg-[var(--card)] cursor-not-allowed opacity-60"
+            : "bg-[var(--bg)] cursor-text"
+        }`}
       />
       {helperText && (
-        <small
-          style={{
-            display: "block",
-            marginTop: 4,
-            color: "var(--text-light)",
-          }}
-        >
+        <small className='mt-1 block text-[var(--text-light)]'>
           {helperText}
         </small>
       )}

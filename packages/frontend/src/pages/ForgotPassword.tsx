@@ -48,7 +48,7 @@ export default function ForgotPassword() {
         backButton={{ label: "Back to Login", to: "/login" }}
       />
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div className='flex flex-col gap-3'>
         <FormInput
           id='email'
           label='Email'
@@ -68,22 +68,9 @@ export default function ForgotPassword() {
           {loading ? "Sending..." : "Send Reset Link"}
         </FormButton>
 
-        <p style={{ textAlign: "center", fontSize: 14, marginTop: 16 }}>
+        <p className='mt-4 text-center text-sm'>
           Remember your password?{" "}
-          <a
-            href='/login'
-            style={{
-              color: "#007bff",
-              textDecoration: "none",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.textDecoration = "underline")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.textDecoration = "none")
-            }
-          >
+          <a href='/login' className='text-blue-600 hover:underline'>
             Back to Login
           </a>
         </p>

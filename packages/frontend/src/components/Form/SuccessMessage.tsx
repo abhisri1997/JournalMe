@@ -9,13 +9,7 @@ export default function SuccessMessage({ message }: SuccessMessageProps) {
 
   return (
     <div
-      style={{
-        padding: 12,
-        backgroundColor: "#efe",
-        color: "#3c3",
-        borderRadius: "4px",
-        fontSize: 14,
-      }}
+      className='rounded-md bg-green-100 p-3 text-green-700 text-sm'
       role='status'
     >
       {message}

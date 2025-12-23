@@ -72,7 +72,7 @@ export default function Register() {
           e.preventDefault();
           submit();
         }}
-        style={{ display: "grid", gap: 12, marginTop: error ? 12 : 0 }}
+        className={`grid gap-3 ${error ? "mt-3" : "mt-0"}`}
       >
         <FormInput
           name='email'
@@ -94,7 +94,7 @@ export default function Register() {
         <FormButton type='submit' disabled={loading}>
           {loading ? "Registering..." : "Register"}
         </FormButton>
-        <div style={{ marginTop: 16, textAlign: "center", fontSize: "0.9rem" }}>
+        <div className='mt-4 text-center text-sm'>
           Already have an account?{" "}
           <LinkButton onClick={() => navigate("/login")}>Login here</LinkButton>
         </div>

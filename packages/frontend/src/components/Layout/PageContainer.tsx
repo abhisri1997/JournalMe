@@ -10,6 +10,8 @@ export default function PageContainer({
   maxWidth = 640,
 }: PageContainerProps) {
   return (
-    <main style={{ padding: 24, maxWidth, margin: "0 auto" }}>{children}</main>
+    <main className='mx-auto px-6' style={{ maxWidth }}>
+      {children}
+    </main>
   );
 }

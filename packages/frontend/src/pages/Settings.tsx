@@ -25,29 +25,17 @@ export default function SettingsPage() {
         menuOpen={menuOpen}
         onMenuToggle={() => setMenuOpen((v) => !v)}
       />
-      <section style={{ marginTop: 16 }}>
-        <h1>Settings</h1>
+      <section className='mt-4'>
+        <h1 className='text-2xl font-semibold'>Settings</h1>
 
-        <div style={{ display: "grid", gap: "24px" }}>
-          <div
-            style={{
-              borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
-              paddingBottom: "16px",
-            }}
-          >
-            <h2 style={{ fontSize: "1.1rem", marginBottom: "12px" }}>
-              Appearance
-            </h2>
-            <div style={{ display: "flex", gap: "12px" }}>
+        <div className='grid gap-6'>
+          <div className='border-b border-black/10 pb-4'>
+            <h2 className='text-lg mb-3'>Appearance</h2>
+            <div className='flex gap-3'>
               {["light", "dark"].map((t) => (
                 <label
                   key={t}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    cursor: "pointer",
-                  }}
+                  className='flex items-center gap-2 cursor-pointer'
                 >
                   <input
                     type='radio'
@@ -56,60 +44,30 @@ export default function SettingsPage() {
                     checked={theme === t}
                     onChange={(e) => handleThemeChange(e.target.value)}
                   />
-                  <span style={{ textTransform: "capitalize" }}>{t} Mode</span>
+                  <span className='capitalize'>{t} Mode</span>
                 </label>
               ))}
             </div>
           </div>
 
-          <div
-            style={{
-              borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
-              paddingBottom: "16px",
-            }}
-          >
-            <h2 style={{ fontSize: "1.1rem", marginBottom: "12px" }}>
-              Recording Settings
-            </h2>
-            <p
-              style={{
-                margin: "8px 0",
-                fontSize: "0.9rem",
-                color: "var(--muted)",
-              }}
-            >
+          <div className='border-b border-black/10 pb-4'>
+            <h2 className='text-lg mb-3'>Recording Settings</h2>
+            <p className='my-2 text-sm text-[var(--muted)]'>
               Microphone device is selected on the Journal page
             </p>
           </div>
 
-          <div
-            style={{
-              borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
-              paddingBottom: "16px",
-            }}
-          >
-            <h2 style={{ fontSize: "1.1rem", marginBottom: "12px" }}>About</h2>
-            <p style={{ margin: "8px 0", fontSize: "0.9rem" }}>
-              JournalMe v1.0.0
-            </p>
-            <p
-              style={{
-                margin: "8px 0",
-                fontSize: "0.85rem",
-                color: "var(--muted)",
-              }}
-            >
+          <div className='border-b border-black/10 pb-4'>
+            <h2 className='text-lg mb-3'>About</h2>
+            <p className='my-2 text-sm'>JournalMe v1.0.0</p>
+            <p className='my-2 text-xs text-[var(--muted)]'>
               A simple journaling app with audio recording
             </p>
           </div>
 
           <button
             onClick={() => navigate("/journal")}
-            style={{
-              backgroundColor: "transparent",
-              color: "var(--text)",
-              border: "1px solid rgba(0, 0, 0, 0.2)",
-            }}
+            className='border border-black/20 bg-transparent text-[var(--text)]'
           >
             Back to Journal
           </button>

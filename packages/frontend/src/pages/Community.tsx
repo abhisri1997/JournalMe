@@ -129,26 +129,17 @@ export default function CommunityPage() {
         onMenuToggle={() => setMenuOpen((v) => !v)}
       />
 
-      <section style={{ marginTop: 16, display: "grid", gap: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <h1 style={{ margin: 0 }}>Community</h1>
-          {loading && <span style={{ color: "var(--muted)" }}>Loading…</span>}
+      <section className='mt-4 grid gap-4'>
+        <div className='flex items-center gap-3'>
+          <h1 className='m-0 text-2xl font-semibold'>Community</h1>
+          {loading && <span className='text-[var(--muted)]'>Loading…</span>}
         </div>
 
         {error && (
-          <div
-            style={{
-              padding: "12px",
-              backgroundColor: "#f8d7da",
-              color: "#721c24",
-              borderRadius: 6,
-            }}
-          >
-            {error}
-          </div>
+          <div className='rounded-md bg-red-100 text-red-800 p-3'>{error}</div>
         )}
 
-        <div style={{ display: "grid", gap: 8 }}>
+        <div className='grid gap-2'>
           <label htmlFor='search'>Find people</label>
           <input
             id='search'
@@ -156,15 +147,11 @@ export default function CommunityPage() {
             value={search}
             placeholder='Search by email, username, or phone (min 3 chars)'
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: 6,
-              border: "1px solid var(--border)",
-            }}
+            className='rounded-md border border-[var(--border)] px-3 py-2'
           />
-          <div style={{ display: "grid", gap: 8 }}>
+          <div className='grid gap-2'>
             {discover.length === 0 && (
-              <div style={{ color: "var(--muted)" }}>
+              <div className='text-[var(--muted)] text-sm'>
                 {search.trim().length < 3
                   ? "Type at least 3 characters to search."
                   : "No users found."}
@@ -173,30 +160,21 @@ export default function CommunityPage() {
             {discover.map((user) => (
               <div
                 key={user.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "10px 12px",
-                  border: "1px solid var(--border)",
-                  borderRadius: 8,
-                }}
+                className='flex items-center justify-between p-3 border border-[var(--border)] rounded-lg'
               >
                 <div>
-                  <div style={{ fontWeight: 600 }}>
+                  <div className='font-semibold'>
                     {user.displayName || user.email}
                   </div>
-                  <div style={{ fontSize: "0.9rem", color: "var(--muted)" }}>
+                  <div className='text-sm text-[var(--muted)]'>
                     {user.email}
                   </div>
                   {mutualIds.has(user.id) && (
-                    <div style={{ fontSize: "0.85rem", color: "green" }}>
-                      Mutual
-                    </div>
+                    <div className='text-sm text-green-600'>Mutual</div>
                   )}
                 </div>
 
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div className='flex items-center gap-2'>
                   {user.incomingStatus === "PENDING" &&
                     user.incomingFollowId && (
                       <>
@@ -205,10 +183,7 @@ export default function CommunityPage() {
                         </button>
                         <button
                           onClick={() => reject(user.incomingFollowId!)}
-                          style={{
-                            backgroundColor: "var(--danger, #dc3545)",
-                            color: "white",
-                          }}
+                          className='bg-red-600 text-white'
                         >
                           Reject
                         </button>
@@ -216,7 +191,9 @@ export default function CommunityPage() {
                     )}
 
                   {user.outgoingStatus === "PENDING" && (
-                    <span style={{ color: "var(--muted)" }}>Request sent</span>
+                    <span className='text-[var(--muted)] text-sm'>
+                      Request sent
+                    </span>
                   )}
 
                   {!user.outgoingStatus && !user.incomingStatus && (
@@ -224,7 +201,7 @@ export default function CommunityPage() {
                   )}
 
                   {user.outgoingStatus === "ACCEPTED" && (
-                    <span style={{ color: "green" }}>Following</span>
+                    <span className='text-green-600 text-sm'>Following</span>
                   )}
                 </div>
               </div>
@@ -232,45 +209,29 @@ export default function CommunityPage() {
           </div>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gap: 12,
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          }}
-        >
-          <div
-            style={{
-              border: "1px solid var(--border)",
-              borderRadius: 8,
-              padding: 12,
-            }}
-          >
-            <h3 style={{ marginTop: 0 }}>Requests for you</h3>
+        <div className='grid gap-3 grid-cols-1 md:grid-cols-2'>
+          <div className='border border-[var(--border)] rounded-lg p-3'>
+            <h3 className='mt-0 mb-2 text-lg font-semibold'>
+              Requests for you
+            </h3>
             {incoming.length === 0 && (
-              <div style={{ color: "var(--muted)" }}>No pending requests.</div>
+              <div className='text-[var(--muted)] text-sm'>
+                No pending requests.
+              </div>
             )}
             {incoming.map((req) => (
               <div
                 key={req.id}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "6px 0",
-                }}
+                className='flex justify-between items-center py-1.5'
               >
                 <div>
                   {req.follower ? formatUser(req.follower) : req.followerId}
                 </div>
-                <div style={{ display: "flex", gap: 8 }}>
+                <div className='flex gap-2'>
                   <button onClick={() => accept(req.id)}>Accept</button>
                   <button
                     onClick={() => reject(req.id)}
-                    style={{
-                      backgroundColor: "var(--danger, #dc3545)",
-                      color: "white",
-                    }}
+                    className='bg-red-600 text-white'
                   >
                     Reject
                   </button>
@@ -279,60 +240,48 @@ export default function CommunityPage() {
             ))}
           </div>
 
-          <div
-            style={{
-              border: "1px solid var(--border)",
-              borderRadius: 8,
-              padding: 12,
-            }}
-          >
-            <h3 style={{ marginTop: 0 }}>Requests you sent</h3>
+          <div className='border border-[var(--border)] rounded-lg p-3'>
+            <h3 className='mt-0 mb-2 text-lg font-semibold'>
+              Requests you sent
+            </h3>
             {outgoing.length === 0 && (
-              <div style={{ color: "var(--muted)" }}>No outgoing requests.</div>
+              <div className='text-[var(--muted)] text-sm'>
+                No outgoing requests.
+              </div>
             )}
             {outgoing.map((req) => (
-              <div key={req.id} style={{ padding: "6px 0" }}>
+              <div key={req.id} className='py-1.5'>
                 {req.following ? formatUser(req.following) : req.followingId}
-                <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                <div className='text-sm text-[var(--muted)]'>
                   Status: {req.status}
                 </div>
               </div>
             ))}
           </div>
 
-          <div
-            style={{
-              border: "1px solid var(--border)",
-              borderRadius: 8,
-              padding: 12,
-            }}
-          >
-            <h3 style={{ marginTop: 0 }}>You follow</h3>
+          <div className='border border-[var(--border)] rounded-lg p-3'>
+            <h3 className='mt-0 mb-2 text-lg font-semibold'>You follow</h3>
             {connections.following.length === 0 && (
-              <div style={{ color: "var(--muted)" }}>
+              <div className='text-[var(--muted)] text-sm'>
                 Not following anyone yet.
               </div>
             )}
             {connections.following.map((c) => (
-              <div key={c.id} style={{ padding: "6px 0" }}>
+              <div key={c.id} className='py-1.5'>
                 {formatUser(c.user)}
               </div>
             ))}
           </div>
 
-          <div
-            style={{
-              border: "1px solid var(--border)",
-              borderRadius: 8,
-              padding: 12,
-            }}
-          >
-            <h3 style={{ marginTop: 0 }}>Your followers</h3>
+          <div className='border border-[var(--border)] rounded-lg p-3'>
+            <h3 className='mt-0 mb-2 text-lg font-semibold'>Your followers</h3>
             {connections.followers.length === 0 && (
-              <div style={{ color: "var(--muted)" }}>No followers yet.</div>
+              <div className='text-[var(--muted)] text-sm'>
+                No followers yet.
+              </div>
             )}
             {connections.followers.map((c) => (
-              <div key={c.id} style={{ padding: "6px 0" }}>
+              <div key={c.id} className='py-1.5'>
                 {formatUser(c.user)}
               </div>
             ))}

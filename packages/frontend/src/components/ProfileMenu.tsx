@@ -74,64 +74,20 @@ export default function ProfileMenu() {
     .join("");
 
   return (
-    <div
-      ref={menuRef}
-      style={{
-        position: "relative",
-        display: "inline-block",
-      }}
-    >
+    <div ref={menuRef} className='relative inline-block'>
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label='Profile menu'
-        style={{
-          width: "40px",
-          height: "40px",
-          borderRadius: "50%",
-          border: "none",
-          backgroundColor: "#2563eb",
-          color: "white",
-          cursor: "pointer",
-          fontSize: "1rem",
-          fontWeight: "600",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 0,
-        }}
+        className='flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400'
         title={user.email}
       >
         {initials || "U"}
       </button>
 
       {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            right: 0,
-            marginTop: "8px",
-            backgroundColor: "var(--card)",
-            border: "1px solid rgba(0, 0, 0, 0.1)",
-            borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-            minWidth: "200px",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              padding: "12px 16px",
-              borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "0.9rem",
-                fontWeight: "600",
-                color: "var(--text)",
-              }}
-            >
+        <div className='absolute right-0 mt-2 min-w-[200px] rounded-lg border border-black/10 bg-[var(--card)] shadow-lg z-50'>
+          <div className='border-b border-black/10 px-4 py-3'>
+            <div className='text-sm font-semibold text-[var(--text)]'>
               {user.email}
             </div>
           </div>
@@ -141,25 +97,7 @@ export default function ProfileMenu() {
               navigate("/profile");
               setIsOpen(false);
             }}
-            style={{
-              width: "100%",
-              padding: "10px 16px",
-              backgroundColor: "transparent",
-              border: "none",
-              color: "var(--text)",
-              textAlign: "left",
-              cursor: "pointer",
-              fontSize: "0.95rem",
-              transition: "background-color 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor =
-                "rgba(0, 0, 0, 0.05)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor =
-                "transparent";
-            }}
+            className='w-full bg-transparent px-4 py-2.5 text-left text-sm text-[var(--text)] hover:bg-black/5'
           >
             Edit Profile
           </button>
@@ -169,51 +107,14 @@ export default function ProfileMenu() {
               navigate("/settings");
               setIsOpen(false);
             }}
-            style={{
-              width: "100%",
-              padding: "10px 16px",
-              backgroundColor: "transparent",
-              border: "none",
-              color: "var(--text)",
-              textAlign: "left",
-              cursor: "pointer",
-              fontSize: "0.95rem",
-              borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
-              transition: "background-color 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor =
-                "rgba(0, 0, 0, 0.05)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor =
-                "transparent";
-            }}
+            className='w-full bg-transparent border-b border-black/10 px-4 py-2.5 text-left text-sm text-[var(--text)] hover:bg-black/5'
           >
             Settings
           </button>
 
           <button
             onClick={handleLogout}
-            style={{
-              width: "100%",
-              padding: "10px 16px",
-              backgroundColor: "transparent",
-              border: "none",
-              color: "#dc3545",
-              textAlign: "left",
-              cursor: "pointer",
-              fontSize: "0.95rem",
-              transition: "background-color 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor =
-                "rgba(220, 53, 69, 0.1)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor =
-                "transparent";
-            }}
+            className='w-full bg-transparent px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50'
           >
             Logout
           </button>

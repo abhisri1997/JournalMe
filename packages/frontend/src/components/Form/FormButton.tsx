@@ -15,30 +15,22 @@ export default function FormButton({
   variant = "primary",
   type = "button",
 }: FormButtonProps) {
-  const getBackgroundColor = () => {
-    if (disabled) return "#999";
-    return variant === "primary" ? "#007bff" : "transparent";
-  };
-
-  const getBorderColor = () => {
-    return variant === "secondary" ? "var(--border)" : "none";
-  };
+  const baseClasses =
+    "rounded-md px-4 py-2 text-sm font-medium transition-colors";
+  const variantClasses =
+    variant === "primary"
+      ? "bg-blue-600 text-white hover:bg-blue-700"
+      : "border border-[var(--border)] bg-transparent text-[var(--text)]";
+  const disabledClasses = disabled
+    ? "cursor-not-allowed opacity-60 hover:bg-blue-600"
+    : "cursor-pointer";
 
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      style={{
-        padding: "10px 16px",
-        backgroundColor: getBackgroundColor(),
-        color: variant === "primary" ? "white" : "var(--text)",
-        border: getBorderColor(),
-        borderRadius: "4px",
-        cursor: disabled ? "default" : "pointer",
-        fontSize: 14,
-        fontWeight: variant === "primary" ? 500 : 400,
-      }}
+      className={`${baseClasses} ${variantClasses} ${disabledClasses}`}
     >
       {children}
     </button>

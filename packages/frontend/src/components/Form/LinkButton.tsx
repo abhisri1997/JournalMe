@@ -9,15 +9,7 @@ export default function LinkButton({ children, onClick }: LinkButtonProps) {
   return (
     <button
       onClick={onClick}
-      style={{
-        background: "none",
-        border: "none",
-        color: "var(--primary, #007bff)",
-        cursor: "pointer",
-        textDecoration: "underline",
-        padding: 0,
-        font: "inherit",
-      }}
+      className='bg-transparent text-[var(--primary,#007bff)] underline cursor-pointer p-0 border-0'
     >
       {children}
     </button>

@@ -65,19 +65,12 @@ export default function ProfilePage() {
         menuOpen={menuOpen}
         onMenuToggle={() => setMenuOpen((v) => !v)}
       />
-      <section style={{ marginTop: 16 }}>
-        <h1>Edit Profile</h1>
+      <section className='mt-4'>
+        <h1 className='text-2xl font-semibold'>Edit Profile</h1>
 
-        <div style={{ display: "grid", gap: "16px" }}>
+        <div className='grid gap-4'>
           <div>
-            <label
-              htmlFor='email'
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontWeight: "600",
-              }}
-            >
+            <label htmlFor='email' className='block mb-2 font-semibold'>
               Email
             </label>
             <input
@@ -85,37 +78,15 @@ export default function ProfilePage() {
               type='email'
               value={user.email}
               disabled
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: "4px",
-                border: "1px solid rgba(0, 0, 0, 0.2)",
-                backgroundColor: "var(--card)",
-                color: "var(--text)",
-                opacity: 0.6,
-                cursor: "not-allowed",
-              }}
+              className='w-full rounded-md border border-black/20 bg-[var(--card)] text-[var(--text)] px-3 py-2 opacity-60 cursor-not-allowed'
             />
-            <small
-              style={{
-                display: "block",
-                marginTop: "4px",
-                color: "var(--muted)",
-              }}
-            >
+            <small className='mt-1 block text-[var(--muted)]'>
               Email cannot be changed
             </small>
           </div>
 
           <div>
-            <label
-              htmlFor='displayName'
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontWeight: "600",
-              }}
-            >
+            <label htmlFor='displayName' className='block mb-2 font-semibold'>
               Display Name (optional)
             </label>
             <input
@@ -124,55 +95,29 @@ export default function ProfilePage() {
               placeholder='Enter your name'
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: "4px",
-                border: "1px solid rgba(0, 0, 0, 0.2)",
-                backgroundColor: "var(--card)",
-                color: "var(--text)",
-                fontSize: "1rem",
-              }}
+              className='w-full rounded-md border border-black/20 bg-[var(--card)] text-[var(--text)] px-3 py-2 text-base'
             />
           </div>
 
           {error && (
-            <div
-              style={{
-                padding: "12px",
-                backgroundColor: "#f8d7da",
-                color: "#721c24",
-                borderRadius: "4px",
-              }}
-            >
+            <div className='rounded-md bg-red-100 text-red-800 p-3'>
               {error}
             </div>
           )}
 
           {success && (
-            <div
-              style={{
-                padding: "12px",
-                backgroundColor: "#d4edda",
-                color: "#155724",
-                borderRadius: "4px",
-              }}
-            >
+            <div className='rounded-md bg-green-100 text-green-800 p-3'>
               {success}
             </div>
           )}
 
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div className='flex gap-2'>
             <button onClick={handleSave} disabled={loading}>
               {loading ? "Saving..." : "Save Changes"}
             </button>
             <button
               onClick={() => navigate("/journal")}
-              style={{
-                backgroundColor: "transparent",
-                color: "var(--text)",
-                border: "1px solid rgba(0, 0, 0, 0.2)",
-              }}
+              className='border border-black/20 bg-transparent text-[var(--text)]'
             >
               Cancel
             </button>

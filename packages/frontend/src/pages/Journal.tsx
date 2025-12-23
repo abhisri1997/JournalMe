@@ -369,8 +369,8 @@ export default function Journal() {
         onMenuToggle={() => setMenuOpen((v) => !v)}
       />
 
-      <section style={{ marginTop: 16 }}>
-        <label style={{ display: "block" }}>
+      <section className='mt-4'>
+        <label className='block'>
           <span className='sr-only' aria-hidden>
             Journal text
           </span>
@@ -383,11 +383,8 @@ export default function Journal() {
           />
         </label>
         {devices.length > 0 && (
-          <div style={{ marginTop: 12 }}>
-            <label
-              htmlFor='mic-selector'
-              style={{ display: "block", marginBottom: 4, fontSize: "0.9rem" }}
-            >
+          <div className='mt-3'>
+            <label htmlFor='mic-selector' className='mb-1 block text-sm'>
               Microphone:
             </label>
             <select
@@ -395,17 +392,9 @@ export default function Journal() {
               value={selectedDeviceId}
               onChange={(e) => handleDeviceChange(e.target.value)}
               disabled={recording}
-              style={{
-                padding: "8px 12px",
-                borderRadius: "4px",
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--bg)",
-                color: "var(--text)",
-                fontSize: "0.9rem",
-                minWidth: "200px",
-                cursor: recording ? "not-allowed" : "pointer",
-                opacity: recording ? 0.6 : 1,
-              }}
+              className={`min-w-[200px] rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text)] ${
+                recording ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+              }`}
             >
               {devices.map((device) => (
                 <option key={device.deviceId} value={device.deviceId}>
@@ -419,9 +408,7 @@ export default function Journal() {
           <button aria-label='Save text entry' onClick={() => submit()}>
             Save Text
           </button>
-          <label
-            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-          >
+          <label className='inline-flex items-center gap-1.5'>
             <input
               type='checkbox'
               checked={isPublic}
@@ -449,14 +436,8 @@ export default function Journal() {
           {Array.isArray(entries) &&
             entries.map((e) => (
               <li key={e.id} className='entry'>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                <div className='flex items-center justify-between'>
+                  <div className='text-xs text-[var(--muted)]'>
                     {new Date(e.createdAt).toLocaleString()}
                   </div>
                   <button
@@ -464,27 +445,13 @@ export default function Journal() {
                     aria-label={`Delete entry from ${new Date(
                       e.createdAt
                     ).toLocaleString()}`}
-                    style={{
-                      padding: "4px 8px",
-                      fontSize: "0.75rem",
-                      backgroundColor: "var(--danger, #dc3545)",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
+                    className='rounded bg-[var(--danger,#dc3545)] px-2 py-1 text-xs text-white'
                   >
                     Delete
                   </button>
                 </div>
-                <div style={{ marginTop: 6 }}>{e.text}</div>
-                <div
-                  style={{
-                    marginTop: 6,
-                    fontSize: "0.85rem",
-                    color: "var(--muted)",
-                  }}
-                >
+                <div className='mt-1.5'>{e.text}</div>
+                <div className='mt-1.5 text-xs text-[var(--muted)]'>
                   {e.isPublic ? "Public" : "Private"}
                 </div>
                 {e.audioPath && (

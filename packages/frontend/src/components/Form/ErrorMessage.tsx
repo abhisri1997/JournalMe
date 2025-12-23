@@ -9,13 +9,7 @@ export default function ErrorMessage({ message }: ErrorMessageProps) {
 
   return (
     <div
-      style={{
-        padding: 12,
-        backgroundColor: "#fee",
-        color: "#c33",
-        borderRadius: "4px",
-        fontSize: 14,
-      }}
+      className='rounded-md bg-red-100 p-3 text-red-700 text-sm'
       role='alert'
     >
       {message}

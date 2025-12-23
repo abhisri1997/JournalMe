@@ -50,6 +50,11 @@ if (useHttps) {
   };
 }
 
-export default defineConfig({
-  server: serverConfig,
+export default defineConfig(async () => {
+  const { default: react } = await import("@vitejs/plugin-react");
+  const { default: tailwindcss } = await import("@tailwindcss/vite");
+  return {
+    plugins: [react(), tailwindcss()],
+    server: serverConfig,
+  };
 });

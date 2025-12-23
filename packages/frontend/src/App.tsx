@@ -51,64 +51,42 @@ export default function App() {
       )}
 
       {isAuthenticated && (
-        <section style={{ marginTop: 16 }} aria-label='Home feed'>
-          <h2 style={{ marginTop: 0 }}>Your Feed</h2>
-          {loading && (
-            <div style={{ color: "var(--muted)", marginBottom: 8 }}>
-              Loading…
-            </div>
-          )}
+        <section className='mt-4' aria-label='Home feed'>
+          <h2 className='mt-0 text-2xl font-semibold'>Your Feed</h2>
+          {loading && <div className='mb-2 text-[var(--muted)]'>Loading…</div>}
           {error && (
-            <div
-              style={{
-                padding: 12,
-                backgroundColor: "#f8d7da",
-                color: "#721c24",
-                borderRadius: 6,
-                marginBottom: 8,
-              }}
-            >
+            <div className='mb-2 rounded-md bg-red-100 p-3 text-red-800'>
               {error}
             </div>
           )}
           {feed.length === 0 && !loading && !error && (
-            <div style={{ color: "var(--muted)" }}>
+            <div className='text-[var(--muted)] text-sm'>
               No posts yet. Follow people from the Community page or share a
               public post from your Journal.
             </div>
           )}
-          <div style={{ display: "grid", gap: 12 }}>
+          <div className='grid gap-3'>
             {feed.map((item) => (
               <div
                 key={item.id}
-                style={{
-                  border: "1px solid var(--border)",
-                  borderRadius: 8,
-                  padding: 12,
-                }}
+                className='rounded-lg border border-[var(--border)] p-3'
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <div style={{ fontWeight: 600 }}>
+                <div className='flex items-center justify-between'>
+                  <div className='font-semibold'>
                     {item.user.displayName
                       ? `${item.user.displayName} (${item.user.email})`
                       : item.user.email}
                   </div>
-                  <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                  <div className='text-xs text-[var(--muted)]'>
                     {new Date(item.createdAt).toLocaleString()}
                   </div>
                 </div>
-                <p style={{ marginTop: 8 }}>{item.text}</p>
+                <p className='mt-2'>{item.text}</p>
                 {item.audioPath && (
                   <audio
                     controls
                     src={`/uploads/${item.audioPath}`}
-                    style={{ width: "100%" }}
+                    className='w-full'
                   >
                     <track
                       kind='captions'

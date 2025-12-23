@@ -61,7 +61,7 @@ export default function Login() {
           e.preventDefault();
           submit();
         }}
-        style={{ display: "grid", gap: 12 }}
+        className='grid gap-3'
       >
         <FormInput
           name='email'
@@ -84,13 +84,13 @@ export default function Login() {
         <FormButton type='submit' disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </FormButton>
-        <div style={{ marginTop: 16, textAlign: "center", fontSize: "0.9rem" }}>
+        <div className='mt-4 text-center text-sm'>
           Don't have an account?{" "}
           <LinkButton onClick={() => navigate("/register")}>
             Register here
           </LinkButton>
         </div>
-        <div style={{ marginTop: 12, textAlign: "center", fontSize: "0.9rem" }}>
+        <div className='mt-3 text-center text-sm'>
           <LinkButton onClick={() => navigate("/forgot-password")}>
             Forgot password?
           </LinkButton>
