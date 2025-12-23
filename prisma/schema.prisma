@@ -13,6 +13,8 @@ model JournalEntry {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   text      String
   audioPath String?
+  imagePath String?
+  videoPath String?
   isPublic  Boolean  @default(false)
   createdAt DateTime @default(now())
 }

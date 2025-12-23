@@ -82,6 +82,20 @@ export default function App() {
                   </div>
                 </div>
                 <p className='mt-2'>{item.text}</p>
+                {item.imagePath && (
+                  <img
+                    src={`/uploads/${item.imagePath}`}
+                    alt='Journal attachment'
+                    className='mt-2 max-h-64 w-full rounded-md object-cover'
+                  />
+                )}
+                {item.videoPath && (
+                  <video
+                    className='mt-2 w-full rounded-md'
+                    controls
+                    src={`/uploads/${item.videoPath}`}
+                  />
+                )}
                 {item.audioPath && (
                   <audio
                     controls

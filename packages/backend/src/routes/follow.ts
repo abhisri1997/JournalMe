@@ -295,6 +295,8 @@ router.get("/feed", async (req: AuthRequest, res) => {
         text: entry.text,
         createdAt: entry.createdAt,
         audioPath: entry.audioPath,
+        imagePath: entry.imagePath,
+        videoPath: entry.videoPath,
         user: entry.user,
         isPublic: entry.isPublic,
       }))

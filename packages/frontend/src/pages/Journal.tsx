@@ -7,6 +7,8 @@ type Entry = {
   id: string;
   text: string;
   audioPath?: string;
+  imagePath?: string;
+  videoPath?: string;
   createdAt: string;
   isPublic?: boolean;
 };
@@ -16,6 +18,8 @@ export default function Journal() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [text, setText] = useState("");
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -81,9 +85,14 @@ export default function Journal() {
   }
 
   async function submit(textVal = text, audioBlob?: Blob) {
-    // Don't save if text is empty and no audio
-    if (!textVal.trim() && !audioBlob) {
-      notify("Please enter some text or record audio before saving.");
+    const hasText = Boolean(textVal.trim());
+    const hasAudio = Boolean(audioBlob);
+    const hasImage = Boolean(imageFile);
+    const hasVideo = Boolean(videoFile);
+
+    // Require at least one content type
+    if (!hasText && !hasAudio && !hasImage && !hasVideo) {
+      notify("Add text, audio, photo, or video before saving.");
       return;
     }
 
@@ -106,6 +115,14 @@ export default function Journal() {
       form.append("audio", new File([audioBlob], `recording.${extension}`));
     }
 
+    if (imageFile) {
+      form.append("image", imageFile);
+    }
+
+    if (videoFile) {
+      form.append("video", videoFile);
+    }
+
     try {
       const res = await authFetch("/api/journals/", {
         method: "POST",
@@ -126,6 +143,8 @@ export default function Journal() {
       notify("Failed to save entry");
     } finally {
       setText("");
+      setImageFile(null);
+      setVideoFile(null);
     }
   }
 
@@ -382,6 +401,34 @@ export default function Journal() {
             rows={4}
           />
         </label>
+        <div className='mt-3 grid gap-3 sm:grid-cols-2'>
+          <label className='flex flex-col gap-1 text-sm'>
+            Add photo
+            <input
+              type='file'
+              accept='image/*'
+              onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+            />
+            {imageFile && (
+              <span className='text-[var(--muted)] text-xs'>
+                Selected: {imageFile.name}
+              </span>
+            )}
+          </label>
+          <label className='flex flex-col gap-1 text-sm'>
+            Add video
+            <input
+              type='file'
+              accept='video/*'
+              onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+            />
+            {videoFile && (
+              <span className='text-[var(--muted)] text-xs'>
+                Selected: {videoFile.name}
+              </span>
+            )}
+          </label>
+        </div>
         {devices.length > 0 && (
           <div className='mt-3'>
             <label htmlFor='mic-selector' className='mb-1 block text-sm'>
@@ -454,6 +501,20 @@ export default function Journal() {
                 <div className='mt-1.5 text-xs text-[var(--muted)]'>
                   {e.isPublic ? "Public" : "Private"}
                 </div>
+                {e.imagePath && (
+                  <img
+                    src={`/uploads/${e.imagePath}`}
+                    alt='Journal attachment'
+                    className='mt-2 max-h-64 w-full rounded-md object-cover'
+                  />
+                )}
+                {e.videoPath && (
+                  <video
+                    className='mt-2 w-full rounded-md'
+                    controls
+                    src={`/uploads/${e.videoPath}`}
+                  />
+                )}
                 {e.audioPath && (
                   <audio
                     aria-label={`audio-${e.id}`}

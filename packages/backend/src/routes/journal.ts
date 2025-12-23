@@ -30,12 +30,18 @@ import prisma from "../db";
 
 router.post(
   "/",
-  upload.single("audio"),
+  upload.fields([
+    { name: "audio", maxCount: 1 },
+    { name: "image", maxCount: 1 },
+    { name: "video", maxCount: 1 },
+  ]),
   async (req: AuthRequest, res: express.Response) => {
     try {
       const { text, isPublic: isPublicRaw } = req.body || {};
-      const reqWithFile = req as AuthRequest & {
-        file?: Express.Multer.File;
+      const reqWithFiles = req as AuthRequest & {
+        files?: {
+          [fieldname: string]: Express.Multer.File[];
+        };
       };
 
       if (!req.user) {
@@ -44,18 +50,23 @@ router.post(
 
       console.log("POST /journals - Received request");
       console.log("Text:", text);
-      console.log("File received:", !!reqWithFile.file);
-      if (reqWithFile.file) {
-        console.log("File details:", {
-          fieldname: reqWithFile.file.fieldname,
-          originalname: reqWithFile.file.originalname,
-          encoding: reqWithFile.file.encoding,
-          mimetype: reqWithFile.file.mimetype,
-          size: reqWithFile.file.size,
-          destination: reqWithFile.file.destination,
-          filename: reqWithFile.file.filename,
-        });
-      }
+      const logFile = (field: string) => {
+        const file = reqWithFiles.files?.[field]?.[0];
+        if (file) {
+          console.log(`${field} file details:`, {
+            fieldname: file.fieldname,
+            originalname: file.originalname,
+            encoding: file.encoding,
+            mimetype: file.mimetype,
+            size: file.size,
+            destination: file.destination,
+            filename: file.filename,
+          });
+        }
+      };
+      logFile("audio");
+      logFile("image");
+      logFile("video");
 
       const isPublic =
         isPublicRaw === true ||
@@ -63,12 +74,16 @@ router.post(
         isPublicRaw === "1" ||
         isPublicRaw === 1;
 
-      const audioFilename = reqWithFile.file?.filename;
+      const audioFilename = reqWithFiles.files?.audio?.[0]?.filename;
+      const imageFilename = reqWithFiles.files?.image?.[0]?.filename;
+      const videoFilename = reqWithFiles.files?.video?.[0]?.filename;
       const created = await prisma.journalEntry.create({
         data: {
           userId: req.user.id,
           text: text ?? "",
           audioPath: audioFilename,
+          imagePath: imageFilename,
+          videoPath: videoFilename,
           isPublic,
         },
       });
@@ -118,11 +133,13 @@ router.delete("/:id", async (req: AuthRequest, res: express.Response) => {
   if (entry.userId !== req.user.id) {
     return res.status(403).json({ error: "Forbidden" });
   }
-  // remove audio file if it exists
-  if (entry.audioPath) {
-    const p = path.join(uploadsDir, entry.audioPath);
-    if (fs.existsSync(p)) fs.unlinkSync(p);
-  }
+  // remove media files if they exist
+  [entry.audioPath, entry.imagePath, entry.videoPath]
+    .filter(Boolean)
+    .forEach((filename) => {
+      const p = path.join(uploadsDir, filename as string);
+      if (fs.existsSync(p)) fs.unlinkSync(p);
+    });
   await prisma.journalEntry.delete({ where: { id: req.params.id } });
   return res.status(204).send();
 });

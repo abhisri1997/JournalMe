@@ -51,6 +51,8 @@ export interface FeedEntry {
   text: string;
   createdAt: string;
   audioPath?: string | null;
+  imagePath?: string | null;
+  videoPath?: string | null;
   user: { id: string; email: string; displayName?: string | null };
   isPublic: boolean;
 }
@@ -166,7 +168,9 @@ export class JournalService {
   static async createEntry(
     text: string,
     audioBlob?: Blob,
-    isPublic = false
+    isPublic = false,
+    imageFile?: File,
+    videoFile?: File
   ): Promise<any> {
     const form = new FormData();
     form.append("text", text);
@@ -177,6 +181,14 @@ export class JournalService {
       if (audioBlob.type.includes("mp4")) extension = "mp4";
       else if (audioBlob.type.includes("ogg")) extension = "ogg";
       form.append("audio", new File([audioBlob], `recording.${extension}`));
+    }
+
+    if (imageFile) {
+      form.append("image", imageFile);
+    }
+
+    if (videoFile) {
+      form.append("video", videoFile);
     }
 
     const res = await authFetch(API_ENDPOINTS.JOURNALS.BASE, {
