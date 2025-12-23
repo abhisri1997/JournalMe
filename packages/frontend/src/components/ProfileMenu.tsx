@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearToken, getToken } from "../auth";
+import { STORAGE_KEYS } from "../constants";
 
 type User = {
   id: string;
@@ -23,7 +24,7 @@ export default function ProfileMenu() {
 
     // For now, we'll extract email from a potential user info endpoint
     // You might need to add a /api/auth/me endpoint to get current user
-    const storedUser = localStorage.getItem("jm_user");
+    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
     console.log(
       "ProfileMenu: token exists:",
       !!token,
@@ -59,7 +60,7 @@ export default function ProfileMenu() {
 
   const handleLogout = () => {
     clearToken();
-    localStorage.removeItem("jm_user");
+    localStorage.removeItem(STORAGE_KEYS.USER);
     navigate("/", { replace: true });
   };
 

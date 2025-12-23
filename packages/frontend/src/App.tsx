@@ -1,70 +1,127 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import ProfileMenu from "./components/ProfileMenu";
-import ThemeToggle from "./components/ThemeToggle";
-import { HomeIcon, JournalIcon, UserIcon } from "./components/Icons";
-import { getToken } from "./auth";
+import NavigationBar from "./components/NavigationBar";
+import { useAuth } from "./hooks";
+import { FollowService, FeedEntry } from "./services/api";
 
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isAuthed, setIsAuthed] = useState(!!getToken());
+  const { isAuthenticated } = useAuth();
+  const [feed, setFeed] = useState<FeedEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const updateAuth = () => setIsAuthed(!!getToken());
-    window.addEventListener("storage", updateAuth);
-    window.addEventListener("focus", updateAuth);
+    if (!isAuthenticated) {
+      setFeed([]);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    FollowService.fetchFeed()
+      .then((data) => {
+        if (!cancelled) setFeed(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        if (!cancelled)
+          setError(err instanceof Error ? err.message : "Failed to load feed");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
-      window.removeEventListener("storage", updateAuth);
-      window.removeEventListener("focus", updateAuth);
+      cancelled = true;
     };
-  }, []);
+  }, [isAuthenticated]);
+
   return (
     <div className='site-container'>
-      <nav className='site-nav' role='navigation' aria-label='Main navigation'>
-        <div className='nav-left'>
-          <div className='logo' aria-label='JournalMe logo'>
-            <JournalIcon className='logo-icon' />
-            <span className='logo-text'>JournalMe</span>
+      <NavigationBar
+        isAuthenticated={isAuthenticated}
+        menuOpen={menuOpen}
+        onMenuToggle={() => setMenuOpen((v) => !v)}
+      />
+      {!isAuthenticated && (
+        <section className='welcome-card' aria-label='Welcome message'>
+          <h2 className='welcome-title'>Welcome to JournalMe</h2>
+          <p className='welcome-text'>
+            A simple journaling app—use the navigation to access pages.
+          </p>
+        </section>
+      )}
+
+      {isAuthenticated && (
+        <section style={{ marginTop: 16 }} aria-label='Home feed'>
+          <h2 style={{ marginTop: 0 }}>Your Feed</h2>
+          {loading && (
+            <div style={{ color: "var(--muted)", marginBottom: 8 }}>
+              Loading…
+            </div>
+          )}
+          {error && (
+            <div
+              style={{
+                padding: 12,
+                backgroundColor: "#f8d7da",
+                color: "#721c24",
+                borderRadius: 6,
+                marginBottom: 8,
+              }}
+            >
+              {error}
+            </div>
+          )}
+          {feed.length === 0 && !loading && !error && (
+            <div style={{ color: "var(--muted)" }}>
+              No posts yet. Follow people from the Community page or share a
+              public post from your Journal.
+            </div>
+          )}
+          <div style={{ display: "grid", gap: 12 }}>
+            {feed.map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  border: "1px solid var(--border)",
+                  borderRadius: 8,
+                  padding: 12,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div style={{ fontWeight: 600 }}>
+                    {item.user.displayName
+                      ? `${item.user.displayName} (${item.user.email})`
+                      : item.user.email}
+                  </div>
+                  <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                    {new Date(item.createdAt).toLocaleString()}
+                  </div>
+                </div>
+                <p style={{ marginTop: 8 }}>{item.text}</p>
+                {item.audioPath && (
+                  <audio
+                    controls
+                    src={`/uploads/${item.audioPath}`}
+                    style={{ width: "100%" }}
+                  >
+                    <track
+                      kind='captions'
+                      srcLang='en'
+                      src={`/uploads/${item.audioPath}.vtt`}
+                    />
+                  </audio>
+                )}
+              </div>
+            ))}
           </div>
-          <div
-            id='primary-navigation'
-            className={`nav-links ${menuOpen ? "open" : ""}`}
-            aria-label='Primary'
-          >
-            <NavLink to='/' end aria-label='Home'>
-              <HomeIcon className='icon' /> Home
-            </NavLink>
-            <NavLink to='/journal' aria-label='Journal'>
-              <JournalIcon className='icon' /> Journal
-            </NavLink>
-            <NavLink to='/login' aria-label='Login'>
-              <UserIcon className='icon' /> Login
-            </NavLink>
-            <NavLink to='/register' aria-label='Register'>
-              <UserIcon className='icon' /> Register
-            </NavLink>
-          </div>
-        </div>
-        <div className='nav-right'>
-          <button
-            className='menu-button'
-            aria-label='Toggle menu'
-            aria-controls='primary-navigation'
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            Menu
-          </button>
-          <ThemeToggle />
-          {isAuthed && <ProfileMenu />}
-        </div>
-      </nav>
-      <section className='welcome-card' aria-label='Welcome message'>
-        <h2 className='welcome-title'>Welcome to JournalMe</h2>
-        <p className='welcome-text'>
-          A simple journaling app—use the navigation to access pages.
-        </p>
-      </section>
+        </section>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import Header from "../components/Header";
+import NavigationBar from "../components/NavigationBar";
+import { useAuth } from "../hooks";
 import { authFetch } from "../auth";
 
 type Entry = {
@@ -7,9 +8,12 @@ type Entry = {
   text: string;
   audioPath?: string;
   createdAt: string;
+  isPublic?: boolean;
 };
 
 export default function Journal() {
+  const { isAuthenticated } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
   const [text, setText] = useState("");
   const [entries, setEntries] = useState<Entry[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -18,6 +22,7 @@ export default function Journal() {
   const [recording, setRecording] = useState(false);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
+  const [isPublic, setIsPublic] = useState(false);
 
   function notify(message: string) {
     if (typeof window !== "undefined" && typeof window.alert === "function") {
@@ -92,6 +97,7 @@ export default function Journal() {
 
     const form = new FormData();
     form.append("text", textVal);
+    form.append("isPublic", isPublic ? "true" : "false");
     if (audioBlob) {
       // Determine file extension based on blob type
       let extension = "webm";
@@ -310,10 +316,11 @@ export default function Journal() {
       mr.onerror = (event: Event) => {
         if (levelCheckInterval) clearInterval(levelCheckInterval);
         console.error("MediaRecorder error:", event);
-        const error = (event as Event & { error?: { message?: string; name?: string } }).error;
+        const error = (
+          event as Event & { error?: { message?: string; name?: string } }
+        ).error;
         notify(
-          "Recording error: " +
-            (error?.message ?? error?.name ?? "unknown")
+          "Recording error: " + (error?.message ?? error?.name ?? "unknown")
         );
         if (
           streamRef.current &&
@@ -356,7 +363,11 @@ export default function Journal() {
 
   return (
     <main className='site-container'>
-      <Header />
+      <NavigationBar
+        isAuthenticated={isAuthenticated}
+        menuOpen={menuOpen}
+        onMenuToggle={() => setMenuOpen((v) => !v)}
+      />
 
       <section style={{ marginTop: 16 }}>
         <label style={{ display: "block" }}>
@@ -408,6 +419,16 @@ export default function Journal() {
           <button aria-label='Save text entry' onClick={() => submit()}>
             Save Text
           </button>
+          <label
+            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+          >
+            <input
+              type='checkbox'
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+            />
+            <span>Share publicly with followers</span>
+          </label>
           {!recording ? (
             <button aria-label='Start recording' onClick={startRecording}>
               Start Voice
@@ -457,6 +478,15 @@ export default function Journal() {
                   </button>
                 </div>
                 <div style={{ marginTop: 6 }}>{e.text}</div>
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: "0.85rem",
+                    color: "var(--muted)",
+                  }}
+                >
+                  {e.isPublic ? "Public" : "Private"}
+                </div>
                 {e.audioPath && (
                   <audio
                     aria-label={`audio-${e.id}`}

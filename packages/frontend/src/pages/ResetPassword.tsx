@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { PageContainer, PageHeader } from "../components/Layout";
+import {
+  FormInput,
+  FormButton,
+  ErrorMessage,
+  SuccessMessage,
+} from "../components/Form";
+import { AuthService } from "../services/api";
+import { ValidationUtils } from "../utils/validation";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -21,13 +30,20 @@ export default function ResetPassword() {
   }, [searchParams]);
 
   async function submit() {
-    if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+    // Validate passwords match
+    const matchValidation = ValidationUtils.validatePasswordMatch(
+      newPassword,
+      confirmPassword
+    );
+    if (!matchValidation.isValid) {
+      setError(matchValidation.error!);
       return;
     }
 
-    if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters");
+    // Validate password strength
+    const passwordValidation = ValidationUtils.validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.error!);
       return;
     }
 
@@ -35,15 +51,7 @@ export default function ResetPassword() {
     setError("");
     setSuccess(false);
     try {
-      const res = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, newPassword }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || "Failed to reset password");
-      }
+      await AuthService.resetPassword(token, newPassword);
       setSuccess(true);
       setNewPassword("");
       setConfirmPassword("");
@@ -60,153 +68,51 @@ export default function ResetPassword() {
   }
 
   return (
-    <main style={{ padding: 24, maxWidth: 640, margin: "0 auto" }}>
-      <div
-        style={{
-          marginBottom: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h1 style={{ margin: 0 }}>Reset Password</h1>
-        <button
-          onClick={() => navigate("/login")}
-          style={{
-            padding: "8px 12px",
-            backgroundColor: "transparent",
-            border: "1px solid var(--border)",
-            borderRadius: "4px",
-            cursor: "pointer",
-            color: "var(--text)",
-            fontSize: 14,
-          }}
-        >
-          Back to Login
-        </button>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title='Reset Password'
+        backButton={{ label: "Back to Login", to: "/login" }}
+      />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {!token ? (
-          <div
-            style={{
-              padding: 12,
-              backgroundColor: "#fee",
-              color: "#c33",
-              borderRadius: "4px",
-              fontSize: 14,
-            }}
-          >
-            {error}
-          </div>
+          <ErrorMessage message={error} />
         ) : (
           <>
-            <div>
-              <label
-                htmlFor='password'
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                New Password
-              </label>
-              <input
-                id='password'
-                type='password'
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder='Enter new password'
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  border: "1px solid var(--border)",
-                  borderRadius: "4px",
-                  backgroundColor: "var(--bg)",
-                  color: "var(--text)",
-                  boxSizing: "border-box",
-                }}
-              />
-              <small
-                style={{
-                  display: "block",
-                  marginTop: 4,
-                  color: "var(--text-light)",
-                }}
-              >
-                At least 8 characters
-              </small>
-            </div>
+            <FormInput
+              id='password'
+              label='New Password'
+              type='password'
+              value={newPassword}
+              onChange={setNewPassword}
+              placeholder='Enter new password'
+              helperText='At least 8 characters'
+            />
 
-            <div>
-              <label
-                htmlFor='confirm'
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Confirm Password
-              </label>
-              <input
-                id='confirm'
-                type='password'
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder='Confirm new password'
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  border: "1px solid var(--border)",
-                  borderRadius: "4px",
-                  backgroundColor: "var(--bg)",
-                  color: "var(--text)",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
+            <FormInput
+              id='confirm'
+              label='Confirm Password'
+              type='password'
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              placeholder='Confirm new password'
+            />
 
-            {error && (
-              <div
-                style={{
-                  padding: 12,
-                  backgroundColor: "#fee",
-                  color: "#c33",
-                  borderRadius: "4px",
-                  fontSize: 14,
-                }}
-              >
-                {error}
-              </div>
-            )}
+            <ErrorMessage message={error} />
 
             {success && (
-              <div
-                style={{
-                  padding: 12,
-                  backgroundColor: "#efe",
-                  color: "#3c3",
-                  borderRadius: "4px",
-                  fontSize: 14,
-                }}
-              >
-                Password reset successfully! Redirecting to login...
-              </div>
+              <SuccessMessage message='Password reset successfully! Redirecting to login...' />
             )}
 
-            <button
+            <FormButton
               onClick={submit}
               disabled={loading || !newPassword || !confirmPassword}
-              style={{
-                padding: "10px 16px",
-                backgroundColor: loading ? "#999" : "#007bff",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: loading ? "default" : "pointer",
-                fontSize: 14,
-                fontWeight: 500,
-              }}
             >
               {loading ? "Resetting..." : "Reset Password"}
-            </button>
+            </FormButton>
           </>
         )}
       </div>
-    </main>
+    </PageContainer>
   );
 }

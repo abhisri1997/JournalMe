@@ -13,6 +13,7 @@ model JournalEntry {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   text      String
   audioPath String?
+  isPublic  Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 
@@ -24,6 +25,29 @@ model User {
   journalEntries     JournalEntry[]
   resetToken         String?        @unique
   resetTokenExpiry   DateTime?
+  following          Follow[]       @relation("Following")
+  followers          Follow[]       @relation("Followers")
   createdAt          DateTime       @default(now())
+}
+
+model Follow {
+  id          String        @id @default(uuid())
+  followerId  String
+  followingId String
+  status      FollowStatus  @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  follower  User @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+}
+
+enum FollowStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 

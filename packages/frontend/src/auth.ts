@@ -1,17 +1,21 @@
+import { STORAGE_KEYS } from "./constants";
+
 export function getToken(): string | null {
-  return localStorage.getItem("jm_token");
+  return localStorage.getItem(STORAGE_KEYS.TOKEN);
 }
+
 export function setToken(t: string) {
-  localStorage.setItem("jm_token", t);
+  localStorage.setItem(STORAGE_KEYS.TOKEN, t);
 }
+
 export function clearToken() {
-  localStorage.removeItem("jm_token");
+  localStorage.removeItem(STORAGE_KEYS.TOKEN);
 }
 
 export function logout() {
   try {
-    localStorage.removeItem("jm_token");
-    localStorage.removeItem("jm_user");
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USER);
   } catch {
     // Ignore errors during logout
   }

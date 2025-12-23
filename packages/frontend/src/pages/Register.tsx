@@ -1,6 +1,15 @@
 import { useState } from "react";
-import { setToken } from "../auth";
 import { useNavigate } from "react-router-dom";
+import { PageContainer, PageHeader } from "../components/Layout";
+import {
+  FormInput,
+  FormButton,
+  ErrorMessage,
+  LinkButton,
+} from "../components/Form";
+import { AuthService } from "../services/api";
+import { STORAGE_KEYS } from "../constants";
+import { ValidationUtils } from "../utils/validation";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -11,43 +20,29 @@ export default function Register() {
 
   async function submit() {
     setError("");
-    if (!email || !password) {
-      setError("Email and password are required");
+
+    // Validate inputs
+    const emailValidation = ValidationUtils.validateEmail(email);
+    if (!emailValidation.isValid) {
+      setError(emailValidation.error!);
       return;
     }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+
+    const passwordValidation = ValidationUtils.validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.error!);
       return;
     }
+
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Register error response:", {
-          status: res.status,
-          statusText: res.statusText,
-          body: errorText,
-        });
-        let err;
-        try {
-          err = JSON.parse(errorText);
-        } catch {
-          err = { error: errorText || `HTTP ${res.status}` };
-        }
-        throw new Error(err.error || "Register failed");
+      const data = await AuthService.register({ email, password });
+      if (data.token) {
+        localStorage.setItem(STORAGE_KEYS.TOKEN, data.token);
       }
-      const data = await res.json();
-      if (data.token) setToken(data.token);
-      // Store user info from the response
       if (data.user) {
-        localStorage.setItem("jm_user", JSON.stringify(data.user));
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data.user));
       }
-      // Navigate to journal after success
       navigate("/journal");
     } catch (err) {
       console.error("Register exception:", err);
@@ -69,80 +64,41 @@ export default function Register() {
   }
 
   return (
-    <main style={{ padding: 24, maxWidth: 640, margin: "0 auto" }}>
-      <div
-        style={{
-          marginBottom: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+    <PageContainer>
+      <PageHeader title='Register' backButton={{ label: "Home", to: "/" }} />
+      <ErrorMessage message={error} />
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit();
         }}
+        style={{ display: "grid", gap: 12, marginTop: error ? 12 : 0 }}
       >
-        <h1 style={{ margin: 0 }}>Register</h1>
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            padding: "8px 12px",
-            backgroundColor: "transparent",
-            border: "1px solid var(--border)",
-            borderRadius: "4px",
-            cursor: "pointer",
-            color: "var(--text)",
-            fontSize: "0.9rem",
-          }}
-        >
-          Home
-        </button>
-      </div>
-      {error && (
-        <div
-          style={{
-            color: "red",
-            marginBottom: 16,
-            padding: 12,
-            backgroundColor: "#ffe0e0",
-            borderRadius: 4,
-          }}
-        >
-          {error}
-        </div>
-      )}
-      <div style={{ display: "grid", gap: 8 }}>
-        <input
+        <FormInput
+          name='email'
           placeholder='Email'
           type='email'
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={setEmail}
+          autocomplete='email'
         />
-        <input
+        <FormInput
+          name='password'
           placeholder='Password (min 8 characters)'
           type='password'
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={setPassword}
+          autocomplete='new-password'
+          inputMode='text'
         />
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={submit} disabled={loading}>
-            {loading ? "Registering..." : "Register"}
-          </button>
-        </div>
+        <FormButton type='submit' disabled={loading}>
+          {loading ? "Registering..." : "Register"}
+        </FormButton>
         <div style={{ marginTop: 16, textAlign: "center", fontSize: "0.9rem" }}>
           Already have an account?{" "}
-          <button
-            onClick={() => navigate("/login")}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--primary, #007bff)",
-              cursor: "pointer",
-              textDecoration: "underline",
-              padding: 0,
-              font: "inherit",
-            }}
-          >
-            Login here
-          </button>
+          <LinkButton onClick={() => navigate("/login")}>Login here</LinkButton>
         </div>
-      </div>
-    </main>
+      </form>
+    </PageContainer>
   );
 }

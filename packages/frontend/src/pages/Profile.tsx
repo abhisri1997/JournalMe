@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
-import { authFetch } from "../auth";
+import NavigationBar from "../components/NavigationBar";
+import { useAuth } from "../hooks";
+import { UserService } from "../services/api";
+import { STORAGE_KEYS } from "../constants";
 
 type User = {
   id: string;
@@ -11,6 +13,8 @@ type User = {
 
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,7 +22,7 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("jm_user");
+    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
     if (!storedUser) {
       navigate("/");
       return;
@@ -39,19 +43,8 @@ export default function ProfilePage() {
     setSuccess("");
 
     try {
-      const res = await authFetch("/api/users/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || "Failed to update profile");
-      }
-
-      const updatedUser = await res.json();
-      localStorage.setItem("jm_user", JSON.stringify(updatedUser));
+      const updatedUser = await UserService.updateProfile(displayName);
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
       setUser(updatedUser);
       setSuccess("Profile updated successfully!");
       setTimeout(() => navigate("/journal"), 2000);
@@ -67,7 +60,11 @@ export default function ProfilePage() {
 
   return (
     <main className='site-container'>
-      <Header />
+      <NavigationBar
+        isAuthenticated={isAuthenticated}
+        menuOpen={menuOpen}
+        onMenuToggle={() => setMenuOpen((v) => !v)}
+      />
       <section style={{ marginTop: 16 }}>
         <h1>Edit Profile</h1>
 

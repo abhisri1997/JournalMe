@@ -1,5 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageContainer, PageHeader } from "../components/Layout";
+import {
+  FormInput,
+  FormButton,
+  ErrorMessage,
+  LinkButton,
+} from "../components/Form";
+import { AuthService } from "../services/api";
+import { STORAGE_KEYS } from "../constants";
+import { ValidationUtils } from "../utils/validation";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,23 +21,28 @@ export default function Login() {
   async function submit() {
     setLoading(true);
     setError("");
+
+    // Validate inputs
+    const emailValidation = ValidationUtils.validateEmail(email);
+    if (!emailValidation.isValid) {
+      setError(emailValidation.error!);
+      setLoading(false);
+      return;
+    }
+
+    const passwordValidation = ValidationUtils.validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.error!);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || "Login failed");
-      }
-      const data = await res.json();
-      localStorage.setItem("jm_token", data.token);
-      // Store user info from the response
+      const data = await AuthService.login({ email, password });
+      localStorage.setItem(STORAGE_KEYS.TOKEN, data.token);
       if (data.user) {
-        localStorage.setItem("jm_user", JSON.stringify(data.user));
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data.user));
       }
-      // set a minimal user indicator
       window.location.href = "/";
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed";
@@ -39,85 +54,48 @@ export default function Login() {
   }
 
   return (
-    <main style={{ padding: 24, maxWidth: 640, margin: "0 auto" }}>
-      <div
-        style={{
-          marginBottom: 24,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+    <PageContainer>
+      <PageHeader title='Login' backButton={{ label: "Home", to: "/" }} />
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit();
         }}
+        style={{ display: "grid", gap: 12 }}
       >
-        <h1 style={{ margin: 0 }}>Login</h1>
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            padding: "8px 12px",
-            backgroundColor: "transparent",
-            border: "1px solid var(--border)",
-            borderRadius: "4px",
-            cursor: "pointer",
-            color: "var(--text)",
-            fontSize: "0.9rem",
-          }}
-        >
-          Home
-        </button>
-      </div>
-      <div style={{ display: "grid", gap: 8 }}>
-        <input
+        <FormInput
+          name='email'
           placeholder='Email'
+          type='email'
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={setEmail}
+          autocomplete='email'
         />
-        <input
+        <FormInput
+          name='password'
           placeholder='Password'
           type='password'
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={setPassword}
+          autocomplete='current-password'
+          inputMode='text'
         />
-        {error && (
-          <div style={{ color: "#dc3545", fontSize: "0.9rem" }}>{error}</div>
-        )}
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={submit} disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </div>
+        <ErrorMessage message={error} />
+        <FormButton type='submit' disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </FormButton>
         <div style={{ marginTop: 16, textAlign: "center", fontSize: "0.9rem" }}>
           Don't have an account?{" "}
-          <button
-            onClick={() => navigate("/register")}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--primary, #007bff)",
-              cursor: "pointer",
-              textDecoration: "underline",
-              padding: 0,
-              font: "inherit",
-            }}
-          >
+          <LinkButton onClick={() => navigate("/register")}>
             Register here
-          </button>
+          </LinkButton>
         </div>
         <div style={{ marginTop: 12, textAlign: "center", fontSize: "0.9rem" }}>
-          <button
-            onClick={() => navigate("/forgot-password")}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--primary, #007bff)",
-              cursor: "pointer",
-              textDecoration: "underline",
-              padding: 0,
-              font: "inherit",
-            }}
-          >
+          <LinkButton onClick={() => navigate("/forgot-password")}>
             Forgot password?
-          </button>
+          </LinkButton>
         </div>
-      </div>
-    </main>
+      </form>
+    </PageContainer>
   );
 }

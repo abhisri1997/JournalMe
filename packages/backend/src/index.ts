@@ -3,6 +3,7 @@ import cors from "cors";
 import journalRouter from "./routes/journal";
 import authRouter from "./routes/auth";
 import userRouter from "./routes/user";
+import followRouter from "./routes/follow";
 import { authenticate } from "./middleware/auth";
 
 const app = express();
@@ -14,6 +15,8 @@ app.get("/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/auth", authRouter);
 // user profile routes
 app.use("/api/users", userRouter);
+// follow/friends routes
+app.use("/api/follows", followRouter);
 // protect journal routes
 app.use("/api/journals", authenticate, journalRouter);
 // serve uploaded audio files

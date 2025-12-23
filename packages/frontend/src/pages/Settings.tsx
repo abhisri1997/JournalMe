@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
+import NavigationBar from "../components/NavigationBar";
+import { useAuth } from "../hooks";
 import { useTheme } from "../theme";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
   const { theme, toggle } = useTheme();
 
   const handleThemeChange = (newTheme: string) => {
@@ -17,7 +20,11 @@ export default function SettingsPage() {
 
   return (
     <main className='site-container'>
-      <Header />
+      <NavigationBar
+        isAuthenticated={isAuthenticated}
+        menuOpen={menuOpen}
+        onMenuToggle={() => setMenuOpen((v) => !v)}
+      />
       <section style={{ marginTop: 16 }}>
         <h1>Settings</h1>
 

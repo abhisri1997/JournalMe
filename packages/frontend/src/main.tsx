@@ -9,6 +9,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import Community from "./pages/Community";
 import { ThemeProvider } from "./theme";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./styles.css";
@@ -17,7 +18,9 @@ const root = createRoot(document.getElementById("root")!);
 root.render(
   <React.StrictMode>
     <ThemeProvider>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
         <Routes>
           <Route path='/' element={<App />} />
           <Route
@@ -41,6 +44,14 @@ root.render(
             element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/community'
+            element={
+              <ProtectedRoute>
+                <Community />
               </ProtectedRoute>
             }
           />

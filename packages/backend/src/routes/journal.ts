@@ -33,7 +33,7 @@ router.post(
   upload.single("audio"),
   async (req: AuthRequest, res: express.Response) => {
     try {
-      const { text } = req.body || {};
+      const { text, isPublic: isPublicRaw } = req.body || {};
       const reqWithFile = req as AuthRequest & {
         file?: Express.Multer.File;
       };
@@ -57,12 +57,19 @@ router.post(
         });
       }
 
+      const isPublic =
+        isPublicRaw === true ||
+        isPublicRaw === "true" ||
+        isPublicRaw === "1" ||
+        isPublicRaw === 1;
+
       const audioFilename = reqWithFile.file?.filename;
       const created = await prisma.journalEntry.create({
         data: {
           userId: req.user.id,
           text: text ?? "",
           audioPath: audioFilename,
+          isPublic,
         },
       });
 
