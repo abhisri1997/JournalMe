@@ -94,7 +94,13 @@ export default function App() {
                     className='mt-2 w-full rounded-md'
                     controls
                     src={`/uploads/${item.videoPath}`}
-                  />
+                  >
+                    <track
+                      kind='captions'
+                      srcLang='en'
+                      src={`/uploads/${item.videoPath}.vtt`}
+                    />
+                  </video>
                 )}
                 {item.audioPath && (
                   <audio

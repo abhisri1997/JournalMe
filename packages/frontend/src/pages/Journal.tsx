@@ -513,7 +513,13 @@ export default function Journal() {
                     className='mt-2 w-full rounded-md'
                     controls
                     src={`/uploads/${e.videoPath}`}
-                  />
+                  >
+                    <track
+                      kind='captions'
+                      srcLang='en'
+                      src={`/uploads/${e.videoPath}.vtt`}
+                    />
+                  </video>
                 )}
                 {e.audioPath && (
                   <audio

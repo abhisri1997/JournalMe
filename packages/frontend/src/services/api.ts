@@ -159,10 +159,10 @@ export class UserService {
 }
 
 export class JournalService {
-  static async fetchEntries(): Promise<any[]> {
+  static async fetchEntries(): Promise<FeedEntry[]> {
     const res = await authFetch(API_ENDPOINTS.JOURNALS.BASE);
     if (res.status === 401) return [];
-    return res.json();
+    return (await res.json()) as FeedEntry[];
   }
 
   static async createEntry(
@@ -171,7 +171,7 @@ export class JournalService {
     isPublic = false,
     imageFile?: File,
     videoFile?: File
-  ): Promise<any> {
+  ): Promise<FeedEntry> {
     const form = new FormData();
     form.append("text", text);
     form.append("isPublic", isPublic ? "true" : "false");
@@ -197,7 +197,7 @@ export class JournalService {
     });
 
     if (!res.ok) throw new Error("Failed to save");
-    return res.json();
+    return (await res.json()) as FeedEntry;
   }
 
   static async deleteEntry(id: string): Promise<void> {
