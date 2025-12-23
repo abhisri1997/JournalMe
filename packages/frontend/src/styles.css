@@ -146,6 +146,10 @@
 }
 
 @layer utilities {
+  .mobile-top-bar {
+    @apply hidden;
+  }
+
   @media (max-width: 900px) {
     .site-container {
       @apply px-4;
@@ -249,8 +253,21 @@
   }
 
   @media (max-width: 640px) {
+    .mobile-top-bar {
+      @apply fixed top-0 left-0 right-0 flex items-center justify-between px-4 py-2 bg-[var(--bg)] border-b border-black/10 z-[1001];
+    }
+
+    .mobile-top-actions {
+      @apply flex items-center gap-2;
+    }
+
+    /* Keep the logo visible in the mobile top bar even though other logos hide on mobile */
+    .mobile-top-bar .logo {
+      @apply inline-flex items-center gap-2 font-semibold text-[1.05rem];
+    }
+
     .site-container {
-      @apply pb-20; /* space for bottom nav */
+      @apply pb-20 pt-14; /* space for bottom nav and top bar */
     }
 
     .site-nav {
@@ -265,7 +282,10 @@
       @apply hidden;
     }
 
-    .nav-right,
+    .nav-right {
+      @apply hidden;
+    }
+
     .menu-button {
       @apply hidden;
     }
