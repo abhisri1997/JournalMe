@@ -1,3 +1,4 @@
+import React from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
@@ -37,8 +38,9 @@ test("theme toggle exists on journal page", async () => {
       </ThemeProvider>
     );
   });
-  // Theme toggle shows 'Light' or 'Dark' text
-  expect(await screen.findByText(/Light|Dark/i)).toBeInTheDocument();
+  // Theme toggle shows 'Light' or 'Dark' text (may have multiple in mobile/desktop views)
+  const toggleTexts = await screen.findAllByText(/Light|Dark/i);
+  expect(toggleTexts[0]).toBeInTheDocument();
 });
 
 test("theme toggle persists selection to localStorage", async () => {
@@ -55,7 +57,9 @@ test("theme toggle persists selection to localStorage", async () => {
       </ThemeProvider>
     );
   });
-  const toggle = screen.getByLabelText(/Toggle dark mode/i) as HTMLInputElement;
+  // Multiple toggles exist (mobile top bar + nav); select the first
+  const toggles = screen.getAllByLabelText(/Toggle dark mode/i);
+  const toggle = toggles[0] as HTMLInputElement;
   expect(toggle).toBeInTheDocument();
   // toggle should flip
   const user = userEvent.setup();
