@@ -136,7 +136,9 @@ export default function CommunityPage() {
         </div>
 
         {error && (
-          <div className='rounded-md bg-red-100 text-red-800 p-3'>{error}</div>
+          <div className='rounded-md bg-[var(--error)]/10 text-[var(--error)] p-3'>
+            {error}
+          </div>
         )}
 
         <div className='grid gap-2'>
@@ -170,7 +172,7 @@ export default function CommunityPage() {
                     {user.email}
                   </div>
                   {mutualIds.has(user.id) && (
-                    <div className='text-sm text-green-600'>Mutual</div>
+                    <div className='text-sm text-[var(--accent)]'>Mutual</div>
                   )}
                 </div>
 
@@ -178,12 +180,15 @@ export default function CommunityPage() {
                   {user.incomingStatus === "PENDING" &&
                     user.incomingFollowId && (
                       <>
-                        <button onClick={() => accept(user.incomingFollowId!)}>
+                        <button
+                          onClick={() => accept(user.incomingFollowId!)}
+                          className='font-medium'
+                        >
                           Accept
                         </button>
                         <button
                           onClick={() => reject(user.incomingFollowId!)}
-                          className='bg-red-600 text-white'
+                          className='bg-[var(--error)] text-[#faf6f0] font-medium'
                         >
                           Reject
                         </button>
@@ -197,11 +202,18 @@ export default function CommunityPage() {
                   )}
 
                   {!user.outgoingStatus && !user.incomingStatus && (
-                    <button onClick={() => sendRequest(user.id)}>Follow</button>
+                    <button
+                      onClick={() => sendRequest(user.id)}
+                      className='font-medium'
+                    >
+                      Follow
+                    </button>
                   )}
 
                   {user.outgoingStatus === "ACCEPTED" && (
-                    <span className='text-green-600 text-sm'>Following</span>
+                    <span className='text-[var(--accent)] text-sm'>
+                      Following
+                    </span>
                   )}
                 </div>
               </div>
@@ -228,10 +240,15 @@ export default function CommunityPage() {
                   {req.follower ? formatUser(req.follower) : req.followerId}
                 </div>
                 <div className='flex gap-2'>
-                  <button onClick={() => accept(req.id)}>Accept</button>
+                  <button
+                    onClick={() => accept(req.id)}
+                    className='font-medium'
+                  >
+                    Accept
+                  </button>
                   <button
                     onClick={() => reject(req.id)}
-                    className='bg-red-600 text-white'
+                    className='bg-[var(--error)] text-[#faf6f0] font-medium'
                   >
                     Reject
                   </button>

@@ -101,11 +101,28 @@ router.get("/", async (req: AuthRequest, res: express.Response) => {
   if (!req.user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const data = await prisma.journalEntry.findMany({
-    where: { userId: req.user.id },
-    orderBy: { createdAt: "desc" },
+  const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+  const skip = parseInt(req.query.skip as string) || 0;
+
+  const [data, total] = await Promise.all([
+    prisma.journalEntry.findMany({
+      where: { userId: req.user.id },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      skip: skip,
+    }),
+    prisma.journalEntry.count({
+      where: { userId: req.user.id },
+    }),
+  ]);
+
+  return res.json({
+    entries: data,
+    total,
+    limit,
+    skip,
+    hasMore: skip + limit < total,
   });
-  return res.json(data);
 });
 
 router.get("/:id", async (req: AuthRequest, res: express.Response) => {

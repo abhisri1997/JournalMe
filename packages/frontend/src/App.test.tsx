@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
@@ -7,17 +7,15 @@ import App from "./App";
 import { ThemeProvider } from "./theme";
 
 test("renders navigation links", async () => {
-  await act(async () => {
-    render(
-      <ThemeProvider>
-        <MemoryRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <App />
-        </MemoryRouter>
-      </ThemeProvider>
-    );
-  });
+  render(
+    <ThemeProvider>
+      <MemoryRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <App />
+      </MemoryRouter>
+    </ThemeProvider>
+  );
   expect(screen.getByRole("link", { name: /Home/i })).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /Journal/i })).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /Login/i })).toBeInTheDocument();
@@ -27,17 +25,15 @@ test("renders navigation links", async () => {
 import Journal from "./pages/Journal";
 
 test("theme toggle exists on journal page", async () => {
-  await act(async () => {
-    render(
-      <ThemeProvider>
-        <MemoryRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <Journal />
-        </MemoryRouter>
-      </ThemeProvider>
-    );
-  });
+  render(
+    <ThemeProvider>
+      <MemoryRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <Journal />
+      </MemoryRouter>
+    </ThemeProvider>
+  );
   // Theme toggle shows 'Light' or 'Dark' text (may have multiple in mobile/desktop views)
   const toggleTexts = await screen.findAllByText(/Light|Dark/i);
   expect(toggleTexts[0]).toBeInTheDocument();
@@ -46,26 +42,22 @@ test("theme toggle exists on journal page", async () => {
 test("theme toggle persists selection to localStorage", async () => {
   // Clear storage
   localStorage.removeItem("jm_theme");
-  await act(async () => {
-    render(
-      <ThemeProvider>
-        <MemoryRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <App />
-        </MemoryRouter>
-      </ThemeProvider>
-    );
-  });
+  render(
+    <ThemeProvider>
+      <MemoryRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <App />
+      </MemoryRouter>
+    </ThemeProvider>
+  );
   // Multiple toggles exist (mobile top bar + nav); select the first
   const toggles = screen.getAllByLabelText(/Toggle dark mode/i);
   const toggle = toggles[0] as HTMLInputElement;
   expect(toggle).toBeInTheDocument();
   // toggle should flip
   const user = userEvent.setup();
-  await act(async () => {
-    await user.click(toggle);
-  });
+  await user.click(toggle);
   await waitFor(() => expect(localStorage.getItem("jm_theme")).toBe("dark"));
 });
 
@@ -86,17 +78,15 @@ test("register page submits and stores token", async () => {
       } as Response;
     });
 
-  await act(async () => {
-    render(
-      <ThemeProvider>
-        <MemoryRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <Register />
-        </MemoryRouter>
-      </ThemeProvider>
-    );
-  });
+  render(
+    <ThemeProvider>
+      <MemoryRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <Register />
+      </MemoryRouter>
+    </ThemeProvider>
+  );
   expect(
     await screen.findByRole("heading", { name: /Register/i })
   ).toBeInTheDocument();
@@ -105,13 +95,11 @@ test("register page submits and stores token", async () => {
   const passInput = screen.getByPlaceholderText(/Password/i);
   // Fill out form
   const user = userEvent.setup();
-  await act(async () => {
-    await user.type(emailInput as HTMLInputElement, "user@example.com");
-    await user.type(passInput as HTMLInputElement, "password123");
+  await user.type(emailInput as HTMLInputElement, "user@example.com");
+  await user.type(passInput as HTMLInputElement, "password123");
 
-    const registerBtn = screen.getByRole("button", { name: /Register/i });
-    await user.click(registerBtn);
-  });
+  const registerBtn = screen.getByRole("button", { name: /Register/i });
+  await user.click(registerBtn);
 
   // Token should be stored
   await waitFor(() =>

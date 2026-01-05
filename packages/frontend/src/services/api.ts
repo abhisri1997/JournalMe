@@ -159,10 +159,24 @@ export class UserService {
 }
 
 export class JournalService {
-  static async fetchEntries(): Promise<FeedEntry[]> {
-    const res = await authFetch(API_ENDPOINTS.JOURNALS.BASE);
-    if (res.status === 401) return [];
-    return (await res.json()) as FeedEntry[];
+  static async fetchEntries(
+    limit = 20,
+    skip = 0
+  ): Promise<{ entries: FeedEntry[]; hasMore: boolean; total: number }> {
+    const res = await authFetch(
+      `${API_ENDPOINTS.JOURNALS.BASE}?limit=${limit}&skip=${skip}`
+    );
+    if (res.status === 401) return { entries: [], hasMore: false, total: 0 };
+    const data = await res.json();
+    // Handle both old format (array) and new format (object with entries)
+    if (Array.isArray(data)) {
+      return {
+        entries: data as FeedEntry[],
+        hasMore: false,
+        total: data.length,
+      };
+    }
+    return data as { entries: FeedEntry[]; hasMore: boolean; total: number };
   }
 
   static async createEntry(

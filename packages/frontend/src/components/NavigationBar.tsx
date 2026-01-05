@@ -38,12 +38,17 @@ export default function NavigationBar({
             className={`nav-links ${menuOpen ? "open" : ""}`}
             aria-label='Primary'
           >
-            <NavLink to='/journal' aria-label='Journal'>
-              <JournalIcon className='icon' /> Journal
+            <NavLink to='/journal' aria-label='My Journals'>
+              <JournalIcon className='icon' /> My Journals
             </NavLink>
             <NavLink to='/' end aria-label='Home'>
               <HomeIcon className='icon' /> Home
             </NavLink>
+            {isAuthenticated && (
+              <NavLink to='/create-post' aria-label='Create Post'>
+                <span className='icon'>+</span> Create Post
+              </NavLink>
+            )}
             {isAuthenticated && (
               <NavLink to='/community' aria-label='Community'>
                 <JournalIcon className='icon' /> Community

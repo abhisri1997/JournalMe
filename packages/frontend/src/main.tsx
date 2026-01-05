@@ -3,11 +3,14 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from "./App";
 import Journal from "./pages/Journal";
+import CreatePost from "./pages/CreatePost";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
+import PostDetail from "./pages/PostDetail";
+import EditProfile from "./pages/EditProfile";
 import Settings from "./pages/Settings";
 import Community from "./pages/Community";
 import { ThemeProvider } from "./theme";
@@ -27,7 +30,15 @@ root.render(
             path='/journal'
             element={
               <ProtectedRoute>
-                <Journal />
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/create-post'
+            element={
+              <ProtectedRoute>
+                <CreatePost />
               </ProtectedRoute>
             }
           />
@@ -36,6 +47,22 @@ root.render(
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/post/:postId'
+            element={
+              <ProtectedRoute>
+                <PostDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/edit-profile'
+            element={
+              <ProtectedRoute>
+                <EditProfile />
               </ProtectedRoute>
             }
           />

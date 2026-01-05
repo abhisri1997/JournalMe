@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
@@ -50,27 +50,23 @@ test("saves text entry and shows it after server response", async () => {
       } as Response);
     });
 
-  await act(async () => {
-    render(
-      <ThemeProvider>
-        <MemoryRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <Journal />
-        </MemoryRouter>
-      </ThemeProvider>
-    );
-  });
+  render(
+    <ThemeProvider>
+      <MemoryRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <Journal />
+      </MemoryRouter>
+    </ThemeProvider>
+  );
 
   await waitFor(() => expect(callCount).toBeGreaterThanOrEqual(1));
 
   const textarea = screen.getByRole("textbox");
   const user = userEvent.setup();
-  await act(async () => {
-    await user.type(textarea as HTMLTextAreaElement, "hello world");
-    const saveButton = screen.getByRole("button", { name: /Save text entry/i });
-    await user.click(saveButton);
-  });
+  await user.type(textarea as HTMLTextAreaElement, "hello world");
+  const saveButton = screen.getByRole("button", { name: /Save text entry/i });
+  await user.click(saveButton);
 
   // Optimistic UI should display immediately
   expect(await screen.findByText(/hello world/i)).toBeInTheDocument();
@@ -151,17 +147,15 @@ test("can start and stop recording and the saved entry appears", async () => {
     writable: true,
   });
 
-  await act(async () => {
-    render(
-      <ThemeProvider>
-        <MemoryRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <Journal />
-        </MemoryRouter>
-      </ThemeProvider>
-    );
-  });
+  render(
+    <ThemeProvider>
+      <MemoryRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <Journal />
+      </MemoryRouter>
+    </ThemeProvider>
+  );
 
   await waitFor(() => expect(callCount).toBeGreaterThanOrEqual(1));
 
@@ -170,17 +164,13 @@ test("can start and stop recording and the saved entry appears", async () => {
     name: /Start recording/i,
   });
   const user2 = userEvent.setup();
-  await act(async () => {
-    await user2.click(startBtn);
-  });
+  await user2.click(startBtn);
 
   // After starting, the Stop button should be present
   const stopBtn = await screen.findByRole("button", {
     name: /Stop recording/i,
   });
-  await act(async () => {
-    await user2.click(stopBtn);
-  });
+  await user2.click(stopBtn);
 
   // After stop, we expect the created entry to appear
   expect(await screen.findByText(/recorded entry/i)).toBeInTheDocument();

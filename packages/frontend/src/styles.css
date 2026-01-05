@@ -1,19 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #ffffff;
-  --text: #111827;
-  --muted: #6b7280;
-  --card: #f8fafc;
-  --border: #e5e7eb;
+  /* Light Theme - Modern Indian Journal (Warm Terracotta & Cream) */
+  --bg: #fef9f3; /* Soft warm white - modern notebook page */
+  --text: #2d1810; /* Deep brown-black - premium ink */
+  --muted: #7a6355; /* Warm grey-brown - subtle text */
+  --card: #ffffff; /* Pure white cards - clean & modern */
+  --border: #e8ddd1; /* Soft beige border - subtle separation */
+  --accent: #d55734; /* Terracotta/burnt orange - Indian pottery, energy */
+  --accent-hover: #b8451c; /* Deeper terracotta - rich interaction */
+  --success: #c68551; /* Warm amber - positive feedback */
+  --error: #c74528; /* Rust orange - gentle alert */
 }
 
 [data-theme="dark"] {
-  --bg: #0b1220;
-  --text: #e6eef8;
-  --muted: #94a3b8;
-  --card: #071127;
-  --border: #1f2937;
+  /* Dark Theme - Evening Sky Journal (Deep Indigo & Amber) */
+  --bg: #1a1d2e; /* Deep indigo-navy - Indian evening sky */
+  --text: #f5e6d3; /* Warm cream text - easy on eyes */
+  --muted: #b39b87; /* Warm sand - subtle text */
+  --card: #252938; /* Elevated navy cards - depth */
+  --border: #3d4153; /* Cool grey border - modern separation */
+  --accent: #f59e42; /* Warm amber - Indian spice, warmth */
+  --accent-hover: #e8872e; /* Rich amber - engaging hover */
+  --success: #d4a661; /* Golden amber - positive glow */
+  --error: #e87454; /* Soft coral - gentle alert */
 }
 
 @layer base {
@@ -35,7 +45,11 @@
   }
 
   button {
-    @apply bg-blue-600 text-white border-0 px-3 py-2 rounded-md cursor-pointer;
+    @apply bg-[var(--accent)] text-[#faf6f0] border-0 px-3 py-2 rounded-md cursor-pointer transition-colors font-medium;
+  }
+
+  button:hover:not([disabled]) {
+    @apply bg-[var(--accent-hover)];
   }
 
   button[disabled] {
@@ -43,7 +57,7 @@
   }
 
   button:focus {
-    @apply outline-none ring-2 ring-blue-500/30;
+    @apply outline-none ring-2 ring-[var(--accent)]/30;
   }
 }
 
@@ -85,7 +99,7 @@
   }
 
   .nav-links a[aria-current="page"] {
-    @apply text-[var(--text)] font-semibold border-b-2 border-blue-600;
+    @apply text-[var(--text)] font-semibold border-b-2 border-[var(--accent)];
   }
 
   .nav-links .icon {
@@ -303,7 +317,7 @@
     }
 
     .nav-links a[aria-current="page"] {
-      @apply text-[var(--text)] font-semibold border-0;
+      @apply text-[var(--accent)] font-semibold border-0;
     }
   }
 }

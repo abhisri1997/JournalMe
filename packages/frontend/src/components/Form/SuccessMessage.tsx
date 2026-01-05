@@ -9,7 +9,7 @@ export default function SuccessMessage({ message }: SuccessMessageProps) {
 
   return (
     <div
-      className='rounded-md bg-green-100 p-3 text-green-700 text-sm'
+      className='rounded-md bg-[var(--success)]/10 p-3 text-[var(--success)] text-sm'
       role='status'
     >
       {message}

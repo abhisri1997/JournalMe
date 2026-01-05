@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import NavigationBar from "./components/NavigationBar";
+import PostCard from "./components/PostCard";
+import PostModal from "./components/PostModal";
 import { useAuth } from "./hooks";
 import { FollowService, FeedEntry } from "./services/api";
 
@@ -9,6 +11,7 @@ export default function App() {
   const [feed, setFeed] = useState<FeedEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<FeedEntry | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -55,7 +58,7 @@ export default function App() {
           <h2 className='mt-0 text-2xl font-semibold'>Your Feed</h2>
           {loading && <div className='mb-2 text-[var(--muted)]'>Loading…</div>}
           {error && (
-            <div className='mb-2 rounded-md bg-red-100 p-3 text-red-800'>
+            <div className='mb-2 rounded-md bg-[var(--error)]/10 p-3 text-[var(--error)]'>
               {error}
             </div>
           )}
@@ -67,59 +70,43 @@ export default function App() {
           )}
           <div className='grid gap-3'>
             {feed.map((item) => (
-              <div
+              <PostCard
                 key={item.id}
-                className='rounded-lg border border-[var(--border)] p-3'
-              >
-                <div className='flex items-center justify-between'>
-                  <div className='font-semibold'>
-                    {item.user.displayName
-                      ? `${item.user.displayName} (${item.user.email})`
-                      : item.user.email}
-                  </div>
-                  <div className='text-xs text-[var(--muted)]'>
-                    {new Date(item.createdAt).toLocaleString()}
-                  </div>
-                </div>
-                <p className='mt-2'>{item.text}</p>
-                {item.imagePath && (
-                  <img
-                    src={`/uploads/${item.imagePath}`}
-                    alt='Journal attachment'
-                    className='mt-2 max-h-64 w-full rounded-md object-cover'
-                  />
-                )}
-                {item.videoPath && (
-                  <video
-                    className='mt-2 w-full rounded-md'
-                    controls
-                    src={`/uploads/${item.videoPath}`}
-                  >
-                    <track
-                      kind='captions'
-                      srcLang='en'
-                      src={`/uploads/${item.videoPath}.vtt`}
-                    />
-                  </video>
-                )}
-                {item.audioPath && (
-                  <audio
-                    controls
-                    src={`/uploads/${item.audioPath}`}
-                    className='w-full'
-                  >
-                    <track
-                      kind='captions'
-                      srcLang='en'
-                      src={`/uploads/${item.audioPath}.vtt`}
-                    />
-                  </audio>
-                )}
-              </div>
+                post={{
+                  ...item,
+                  imagePath: item.imagePath ?? undefined,
+                  audioPath: item.audioPath ?? undefined,
+                  videoPath: item.videoPath ?? undefined,
+                  user: {
+                    ...item.user,
+                    displayName: item.user.displayName ?? undefined,
+                  },
+                }}
+                onClick={() => setSelectedPost(item)}
+                showUser={true}
+              />
             ))}
           </div>
         </section>
       )}
+
+      <PostModal
+        post={
+          selectedPost
+            ? {
+                ...selectedPost,
+                imagePath: selectedPost.imagePath ?? undefined,
+                audioPath: selectedPost.audioPath ?? undefined,
+                videoPath: selectedPost.videoPath ?? undefined,
+                user: {
+                  ...selectedPost.user,
+                  displayName: selectedPost.user.displayName ?? undefined,
+                },
+              }
+            : null
+        }
+        onClose={() => setSelectedPost(null)}
+      />
     </div>
   );
 }
