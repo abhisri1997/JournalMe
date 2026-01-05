@@ -81,7 +81,9 @@ Created service classes to centralize API calls:
 
 - **AuthService**: Handles login, register, forgot password, reset password
 - **UserService**: Manages user profile operations
-- **JournalService**: Handles journal entry CRUD operations
+- **JournalService**: Handles journal entry CRUD operations with pagination support
+- **FollowService**: Manages follow/unfollow operations and connections
+- **UserService**: Handles user search and profile management
 
 **Benefits:**
 
@@ -89,6 +91,7 @@ Created service classes to centralize API calls:
 - DRY: API logic is not duplicated across components
 - Testability: Services can be mocked and tested independently
 - Type Safety: Consistent interfaces for API operations
+- Pagination Support: JournalService supports limit/skip parameters for infinite scroll
 
 ### 6. Validation Utilities
 
@@ -249,7 +252,135 @@ Updated route handlers to use service layer:
 - **Security**: Validation on both frontend and backend
 - **Maintainability**: Code is easier to read, test, and modify
 
-## File Structure
+### 9. Media Display Components
+
+**Location:** `packages/frontend/src/components/MediaDisplay.tsx` and `packages/frontend/src/components/PostCard.tsx`
+
+Created reusable media components for handling multi-media posts:
+
+- **MediaDisplay**: Displays images, videos, and audio with responsive sizing
+
+  - Images: `max-h-[35vh] sm:max-h-[50vh] md:max-h-[60vh]` for optimal mobile viewing
+  - Videos: Same responsive height constraints with `object-contain` to maintain aspect ratio
+  - Audio: Beautiful gradient design with audio player and metadata display
+
+- **PostCard**: Grid card component for post previews
+
+  - 3-column responsive grid (all screen sizes)
+  - Shows text-only, audio, image, and video posts
+  - Hover overlay with "View Post" action
+  - Public/Private badges
+  - Responsive text sizing for mobile
+
+- **PostModal**: Modal for viewing full post details
+  - Mobile-optimized header (85vh max height on mobile, 90vh on desktop)
+  - Responsive padding and text sizing
+  - Fixed header on tablet/desktop, inline on mobile
+  - Always visible close button with accent color highlight
+
+**Benefits:**
+
+- DRY: Media display logic is reusable across pages
+- Responsive: Optimized for mobile-first viewing
+- Accessibility: Proper alt text and semantic HTML
+- Performance: Images/videos properly constrained to prevent layout shifts
+
+### 10. Pagination Support
+
+**Location:** Backend `/api/journals` endpoint and frontend `JournalService`
+
+Added pagination to journal entries with:
+
+- **Backend**: Support for `limit` (default 20, max 100) and `skip` query parameters
+- **Frontend**: `JournalService.fetchEntries(limit, skip)` returns paginated results with metadata
+- **Load More**: Button in Profile page to load additional posts (20 per batch)
+- **Metadata**: Response includes `total`, `limit`, `skip`, and `hasMore` flags
+
+**Benefits:**
+
+- Performance: Reduces payload size and improves page load time
+- UX: Progressive loading improves perceived performance
+- Scalability: Supports large numbers of entries without client-side issues
+
+### 11. Modern Indian-Inspired Design Theme
+
+**Location:** `packages/frontend/src/styles.css`
+
+Implemented culturally-inspired color scheme:
+
+- **Light Theme**:
+
+  - Background: `#fef9f3` (warm off-white - notebook page)
+  - Accent: `#d55734` (terracotta/burnt orange - Indian pottery)
+  - Success: `#c68551` (warm amber)
+  - Error: `#c74528` (rust orange)
+
+- **Dark Theme**:
+
+  - Background: `#1a1d2e` (deep indigo - evening sky)
+  - Accent: `#f59e42` (warm amber - spices, warmth)
+  - Success: `#d4a661` (golden amber)
+  - Error: `#e87454` (soft coral)
+
+- **Component Gradients**: Updated all component gradients to use warm orange-to-rose palettes
+
+**Benefits:**
+
+- Cultural Relevance: Inspired by Indian design principles
+- Visual Hierarchy: Warm colors guide user attention
+- Accessibility: High contrast ratios for readability
+- Consistency: Unified design language throughout app
+
+### 12. Social Features
+
+**Location:** `packages/frontend/src/pages/Community.tsx` and Follow service
+
+Implemented community interaction features:
+
+- **Follow System**: Users can follow/unfollow other users
+- **Follow Requests**: Send and manage follow requests with approval
+- **User Search**: Search for users by email or name
+- **Followers/Following Lists**: View connections in user profiles
+- **Community Page**: Central hub for discovering users and managing follow requests
+
+**Benefits:**
+
+- Community Building: Users can connect with each other
+- Privacy Control: Follow requests allow controlled access
+- Discoverability: Search helps users find other journal writers
+
+## Recent Updates (January 2026)
+
+### UI/UX Improvements
+
+1. **Mobile Grid Layout**: Changed post grid from responsive 1-2-3 columns to fixed 3 columns on all screen sizes
+
+   - Improved content density on mobile
+   - Consistent card sizes across devices
+   - Responsive text sizing for readability
+
+2. **Navigation Link Visibility**: Updated active nav link color to use accent color for better mobile visibility
+
+   - Changed from text color to accent color
+   - Improved contrast and discoverability
+
+3. **Button Text Consistency**: Standardized all button text styling
+
+   - Added `font-medium` to all buttons
+   - Unified text color to `text-[#faf6f0]`
+   - Consistent padding and sizing
+
+4. **Tab Button Styling**: Updated profile tab buttons to match app button language
+
+   - Active tabs: Filled with accent color
+   - Inactive tabs: Outlined with hover state
+   - Consistent with Create/Cancel buttons
+
+5. **Modal Improvements**:
+   - Media constrained to 35-60vh depending on screen size
+   - Maintains aspect ratio without clipping
+   - Close button now uses accent color background
+   - Header repositioning on mobile for better visibility
 
 ```
 packages/frontend/src/
