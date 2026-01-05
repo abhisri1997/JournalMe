@@ -85,6 +85,7 @@ test("POST /api/auth/reset-password resets password with valid token", async () 
   const testUser = await prisma.user.create({
     data: {
       email: `token-test+${Date.now()}@local`,
+      username: `tokentest${Date.now()}`,
       passwordHash: await bcrypt.hash(oldPassword, 10),
       resetToken: await bcrypt.hash(testToken, 10),
       resetTokenExpiry: new Date(Date.now() + 3600000), // 1 hour from now
@@ -122,6 +123,7 @@ test("POST /api/auth/reset-password rejects expired token", async () => {
   const testUser = await prisma.user.create({
     data: {
       email: `expired-token+${Date.now()}@local`,
+      username: `expiredtoken${Date.now()}`,
       passwordHash: await bcrypt.hash("oldpass123", 10),
       resetToken: await bcrypt.hash(testToken, 10),
       resetTokenExpiry: new Date(Date.now() - 1000), // Expired 1 second ago
@@ -144,6 +146,7 @@ test("POST /api/auth/reset-password requires password to be at least 8 character
   const testUser = await prisma.user.create({
     data: {
       email: `short-pass+${Date.now()}@local`,
+      username: `shortpass${Date.now()}`,
       passwordHash: await bcrypt.hash("oldpass123", 10),
       resetToken: await bcrypt.hash(testToken, 10),
       resetTokenExpiry: new Date(Date.now() + 3600000),

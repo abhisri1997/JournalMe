@@ -16,6 +16,7 @@ export interface LoginResponse {
   user: {
     id: string;
     email: string;
+    username: string;
     displayName?: string;
   };
 }
@@ -23,6 +24,7 @@ export interface LoginResponse {
 export interface DiscoveredUser {
   id: string;
   email: string;
+  username: string;
   displayName?: string | null;
   outgoingFollowId?: string | null;
   outgoingStatus?: string | null;
@@ -35,14 +37,29 @@ export interface FollowRequest {
   followerId: string;
   followingId: string;
   status: string;
-  follower?: { id: string; email: string; displayName?: string | null };
-  following?: { id: string; email: string; displayName?: string | null };
+  follower?: {
+    id: string;
+    email: string;
+    username: string;
+    displayName?: string | null;
+  };
+  following?: {
+    id: string;
+    email: string;
+    username: string;
+    displayName?: string | null;
+  };
   createdAt?: string;
 }
 
 export interface FollowConnection {
   id: string;
-  user: { id: string; email: string; displayName?: string | null };
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    displayName?: string | null;
+  };
   since: string;
 }
 
@@ -53,7 +70,12 @@ export interface FeedEntry {
   audioPath?: string | null;
   imagePath?: string | null;
   videoPath?: string | null;
-  user: { id: string; email: string; displayName?: string | null };
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    displayName?: string | null;
+  };
   isPublic: boolean;
 }
 
@@ -130,6 +152,7 @@ export class UserService {
   static async updateProfile(displayName: string): Promise<{
     id: string;
     email: string;
+    username: string;
     displayName: string;
   }> {
     const res = await authFetch(API_ENDPOINTS.USERS.PROFILE, {

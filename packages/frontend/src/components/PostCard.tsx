@@ -3,6 +3,7 @@ import UserAvatar from "./UserAvatar";
 type User = {
   id: string;
   email: string;
+  username: string;
   displayName?: string;
 };
 
@@ -50,9 +51,7 @@ export default function PostCard({
               size='sm'
             />
             <div className='font-semibold text-sm'>
-              {post.user.displayName
-                ? `${post.user.displayName} (${post.user.email})`
-                : post.user.email}
+              {post.user.displayName || post.user.username}
             </div>
           </div>
           <div className='text-xs text-[var(--muted)]'>

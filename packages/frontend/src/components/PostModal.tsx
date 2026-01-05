@@ -4,6 +4,7 @@ import MediaDisplay from "./MediaDisplay";
 type User = {
   id: string;
   email: string;
+  username: string;
   displayName?: string;
 };
 
@@ -55,7 +56,7 @@ export default function PostModal({ post, onClose }: PostModalProps) {
             />
             <div className='min-w-0 flex-1'>
               <p className='font-semibold text-[var(--text)] truncate'>
-                {post.user.displayName || post.user.email.split("@")[0]}
+                {post.user.displayName || post.user.username}
               </p>
               <p className='text-xs text-[var(--muted)] truncate'>
                 {new Date(post.createdAt).toLocaleString()}

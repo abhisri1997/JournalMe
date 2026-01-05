@@ -9,6 +9,7 @@ export interface CreateUserData {
 export interface UserResponse {
   id: string;
   email: string;
+  username: string;
   displayName?: string | null;
 }
 
@@ -36,15 +37,27 @@ export class UserService {
       throw new Error("User already exists");
     }
 
+    // Generate username from email (part before @)
+    const username = email.split("@")[0];
+
+    // Check if username is already taken (for unique constraint)
+    const existingUsername = await prisma.user.findUnique({
+      where: { username },
+    });
+    if (existingUsername) {
+      throw new Error("Username already exists");
+    }
+
     // Hash password and create user
     const passwordHash = await PasswordService.hash(password);
     const user = await prisma.user.create({
-      data: { email, passwordHash },
+      data: { email, username, passwordHash },
     });
 
     return {
       id: user.id,
       email: user.email,
+      username: user.username,
       displayName: user.displayName,
     };
   }
@@ -76,6 +89,7 @@ export class UserService {
     return {
       id: user.id,
       email: user.email,
+      username: user.username,
       displayName: user.displayName,
     };
   }
@@ -90,6 +104,7 @@ export class UserService {
     return {
       id: user.id,
       email: user.email,
+      username: user.username,
       displayName: user.displayName,
     };
   }
@@ -109,6 +124,7 @@ export class UserService {
     return {
       id: user.id,
       email: user.email,
+      username: user.username,
       displayName: user.displayName,
     };
   }
@@ -151,6 +167,7 @@ export class UserService {
         return {
           id: user.id,
           email: user.email,
+          username: user.username,
           displayName: user.displayName,
         };
       }

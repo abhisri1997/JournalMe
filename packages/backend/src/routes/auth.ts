@@ -27,7 +27,12 @@ router.post("/register", async (req, res) => {
 
     return res.status(HTTP_STATUS.CREATED).json({
       token,
-      user: { id: user.id, email: user.email, displayName: user.displayName },
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        displayName: user.displayName,
+      },
     });
   } catch (error) {
     const message =
@@ -57,7 +62,12 @@ router.post("/login", async (req, res) => {
     const token = generateToken({ id: user.id, email: user.email });
     return res.json({
       token,
-      user: { id: user.id, email: user.email, displayName: user.displayName },
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        displayName: user.displayName,
+      },
     });
   }
 

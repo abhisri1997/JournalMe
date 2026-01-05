@@ -16,6 +16,7 @@ import { STORAGE_KEYS } from "../constants";
 type User = {
   id: string;
   email: string;
+  username: string;
   displayName?: string;
 };
 
@@ -147,7 +148,7 @@ export default function ProfilePage() {
 
   if (!user) return null;
 
-  const displayName = user.displayName || user.email.split("@")[0];
+  const displayName = user.displayName || user.username;
   const postCount = posts.length;
   const followerCount = followers.length;
   const followingCount = following.length;
@@ -178,7 +179,7 @@ export default function ProfilePage() {
               <h1 className='text-3xl font-bold text-[var(--text)] mb-2'>
                 {displayName}
               </h1>
-              <p className='text-[var(--muted)] mb-4'>{user.email}</p>
+              <p className='text-[var(--muted)] mb-4'>@{user.username}</p>
 
               <button
                 onClick={() => navigate("/edit-profile")}
@@ -437,22 +438,21 @@ export default function ProfilePage() {
                           <div className='flex items-center gap-3'>
                             <div className='w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-rose-600 flex items-center justify-center flex-shrink-0'>
                               <span className='text-lg font-bold text-white'>
-                                {connection.user.displayName
-                                  ? connection.user.displayName
-                                      .charAt(0)
-                                      .toUpperCase()
-                                  : connection.user.email
-                                      .charAt(0)
-                                      .toUpperCase()}
+                                {(
+                                  connection.user.displayName ||
+                                  connection.user.username
+                                )
+                                  .charAt(0)
+                                  .toUpperCase()}
                               </span>
                             </div>
                             <div>
                               <p className='font-semibold text-[var(--text)]'>
                                 {connection.user.displayName ||
-                                  connection.user.email.split("@")[0]}
+                                  connection.user.username}
                               </p>
                               <p className='text-sm text-[var(--muted)]'>
-                                {connection.user.email}
+                                @{connection.user.username}
                               </p>
                             </div>
                           </div>
@@ -519,20 +519,21 @@ export default function ProfilePage() {
                         <div className='flex items-center gap-3'>
                           <div className='w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-amber-500 flex items-center justify-center flex-shrink-0'>
                             <span className='text-lg font-bold text-white'>
-                              {connection.user.displayName
-                                ? connection.user.displayName
-                                    .charAt(0)
-                                    .toUpperCase()
-                                : connection.user.email.charAt(0).toUpperCase()}
+                              {(
+                                connection.user.displayName ||
+                                connection.user.username
+                              )
+                                .charAt(0)
+                                .toUpperCase()}
                             </span>
                           </div>
                           <div>
                             <p className='font-semibold text-[var(--text)]'>
                               {connection.user.displayName ||
-                                connection.user.email.split("@")[0]}
+                                connection.user.username}
                             </p>
                             <p className='text-sm text-[var(--muted)]'>
-                              {connection.user.email}
+                              @{connection.user.username}
                             </p>
                           </div>
                         </div>

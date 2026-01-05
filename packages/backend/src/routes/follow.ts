@@ -197,8 +197,12 @@ router.get("/requests", async (req: AuthRequest, res) => {
       where,
       orderBy: { createdAt: "desc" },
       include: {
-        follower: { select: { id: true, email: true, displayName: true } },
-        following: { select: { id: true, email: true, displayName: true } },
+        follower: {
+          select: { id: true, email: true, username: true, displayName: true },
+        },
+        following: {
+          select: { id: true, email: true, username: true, displayName: true },
+        },
       },
     });
 
@@ -224,7 +228,9 @@ router.get("/connections", async (req: AuthRequest, res) => {
     const following = await prisma.follow.findMany({
       where: { followerId: userId, status: FollowStatus.ACCEPTED },
       include: {
-        following: { select: { id: true, email: true, displayName: true } },
+        following: {
+          select: { id: true, email: true, username: true, displayName: true },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -232,7 +238,9 @@ router.get("/connections", async (req: AuthRequest, res) => {
     const followers = await prisma.follow.findMany({
       where: { followingId: userId, status: FollowStatus.ACCEPTED },
       include: {
-        follower: { select: { id: true, email: true, displayName: true } },
+        follower: {
+          select: { id: true, email: true, username: true, displayName: true },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -326,7 +334,9 @@ router.get("/feed", async (req: AuthRequest, res) => {
         userId: { in: [...followingIds, userId] },
       },
       include: {
-        user: { select: { id: true, email: true, displayName: true } },
+        user: {
+          select: { id: true, email: true, username: true, displayName: true },
+        },
       },
       orderBy: { createdAt: "desc" },
       take: 50,

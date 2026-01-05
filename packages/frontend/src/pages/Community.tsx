@@ -127,8 +127,8 @@ export default function CommunityPage() {
     }
   }
 
-  function formatUser(u: { email: string; displayName?: string | null }) {
-    return u.displayName ? `${u.displayName} (${u.email})` : u.email;
+  function formatUser(u: { username: string; displayName?: string | null }) {
+    return u.displayName || u.username;
   }
 
   return (
@@ -176,10 +176,10 @@ export default function CommunityPage() {
               >
                 <div>
                   <div className='font-semibold'>
-                    {user.displayName || user.email}
+                    {user.displayName || user.username}
                   </div>
                   <div className='text-sm text-[var(--muted)]'>
-                    {user.email}
+                    @{user.username}
                   </div>
                   {mutualIds.has(user.id) && (
                     <div className='text-sm text-[var(--accent)]'>Mutual</div>

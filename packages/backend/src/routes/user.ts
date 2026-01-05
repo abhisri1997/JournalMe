@@ -28,10 +28,11 @@ router.get("/search", authenticate, async (req: AuthRequest, res) => {
         id: { not: userId },
         OR: [
           { email: { contains: query, mode: "insensitive" } },
+          { username: { contains: query, mode: "insensitive" } },
           { displayName: { contains: query, mode: "insensitive" } },
         ],
       },
-      select: { id: true, email: true, displayName: true },
+      select: { id: true, email: true, username: true, displayName: true },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
@@ -84,7 +85,13 @@ router.get("/me", authenticate, async (req: AuthRequest, res) => {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, displayName: true, createdAt: true },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        displayName: true,
+        createdAt: true,
+      },
     });
 
     if (!user) {

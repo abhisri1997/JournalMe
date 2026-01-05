@@ -8,6 +8,7 @@ import { STORAGE_KEYS } from "../constants";
 type User = {
   id: string;
   email: string;
+  username: string;
   displayName?: string;
 };
 

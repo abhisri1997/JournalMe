@@ -6,6 +6,8 @@ import { STORAGE_KEYS } from "../constants";
 type User = {
   id: string;
   email: string;
+  username: string;
+  displayName?: string;
 };
 
 export default function ProfileMenu() {
@@ -66,12 +68,14 @@ export default function ProfileMenu() {
 
   if (!user) return null;
 
-  // Extract initials from email
-  const initials = user.email
-    .split("@")[0]
-    .split(".")
-    .map((part) => part[0].toUpperCase())
-    .join("");
+  // Extract initials from displayName or username
+  const displayName = user.displayName || user.username;
+  const initials = displayName
+    .split(/[\s.]/)
+    .map((part) => part[0]?.toUpperCase())
+    .filter(Boolean)
+    .join("")
+    .slice(0, 2);
 
   return (
     <div ref={menuRef} className='relative inline-block'>
@@ -79,7 +83,7 @@ export default function ProfileMenu() {
         onClick={() => setIsOpen(!isOpen)}
         aria-label='Profile menu'
         className='flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] text-[#faf6f0] font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40'
-        title={user.email}
+        title={displayName}
       >
         {initials || "U"}
       </button>
@@ -88,8 +92,9 @@ export default function ProfileMenu() {
         <div className='absolute right-0 mt-2 min-w-[200px] rounded-lg border border-black/10 bg-[var(--card)] shadow-lg z-50'>
           <div className='border-b border-black/10 px-4 py-3'>
             <div className='text-sm font-semibold text-[var(--text)]'>
-              {user.email}
+              {displayName}
             </div>
+            <div className='text-xs text-[var(--muted)]'>@{user.username}</div>
           </div>
 
           <button
