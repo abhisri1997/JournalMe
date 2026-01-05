@@ -289,34 +289,6 @@ export default function CommunityPage() {
               </div>
             ))}
           </div>
-
-          <div className='border border-[var(--border)] rounded-lg p-3'>
-            <h3 className='mt-0 mb-2 text-lg font-semibold'>You follow</h3>
-            {connections.following.length === 0 && (
-              <div className='text-[var(--muted)] text-sm'>
-                Not following anyone yet.
-              </div>
-            )}
-            {connections.following.map((c) => (
-              <div key={c.id} className='py-1.5'>
-                {formatUser(c.user)}
-              </div>
-            ))}
-          </div>
-
-          <div className='border border-[var(--border)] rounded-lg p-3'>
-            <h3 className='mt-0 mb-2 text-lg font-semibold'>Your followers</h3>
-            {connections.followers.length === 0 && (
-              <div className='text-[var(--muted)] text-sm'>
-                No followers yet.
-              </div>
-            )}
-            {connections.followers.map((c) => (
-              <div key={c.id} className='py-1.5'>
-                {formatUser(c.user)}
-              </div>
-            ))}
-          </div>
         </div>
       </section>
     </main>
