@@ -37,8 +37,8 @@ export default function PostDetailPage() {
       setLoading(true);
       setError("");
       try {
-        const posts = await JournalService.fetchEntries();
-        const foundPost = posts.find((p) => p.id === postId);
+        const response = await JournalService.fetchEntries();
+        const foundPost = response.entries.find((p) => p.id === postId);
         if (foundPost) {
           setPost(foundPost);
         } else {

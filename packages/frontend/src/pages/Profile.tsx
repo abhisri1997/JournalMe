@@ -9,6 +9,7 @@ import {
   FollowService,
   FeedEntry,
   FollowConnection,
+  FollowRequest,
 } from "../services/api";
 import { STORAGE_KEYS } from "../constants";
 
@@ -29,6 +30,7 @@ export default function ProfilePage() {
   const [posts, setPosts] = useState<FeedEntry[]>([]);
   const [followers, setFollowers] = useState<FollowConnection[]>([]);
   const [following, setFollowing] = useState<FollowConnection[]>([]);
+  const [outgoingRequests, setOutgoingRequests] = useState<FollowRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
@@ -56,10 +58,12 @@ export default function ProfilePage() {
       setLoading(true);
       setError("");
       try {
-        const [entriesResponse, connectionsData] = await Promise.all([
-          JournalService.fetchEntries(20, 0),
-          FollowService.listConnections(),
-        ]);
+        const [entriesResponse, connectionsData, outgoingReqs] =
+          await Promise.all([
+            JournalService.fetchEntries(20, 0),
+            FollowService.listConnections(),
+            FollowService.listRequests("sent"),
+          ]);
         const entries = Array.isArray(entriesResponse)
           ? entriesResponse
           : entriesResponse.entries;
@@ -70,6 +74,7 @@ export default function ProfilePage() {
         setPostsSkip(20);
         setFollowers(connectionsData.followers);
         setFollowing(connectionsData.following);
+        setOutgoingRequests(outgoingReqs);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load profile data"
@@ -82,6 +87,63 @@ export default function ProfilePage() {
 
     if (user) loadProfileData();
   }, [user]);
+
+  async function unfollowUser(id: string) {
+    try {
+      setError("");
+      await FollowService.unfollow(id);
+      // Reload following list
+      const connectionsData = await FollowService.listConnections();
+      setFollowing(connectionsData.following);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to unfollow user");
+    }
+  }
+
+  async function followBackUser(targetUserId: string) {
+    try {
+      setError("");
+      const response = await FollowService.sendRequest(targetUserId);
+      console.log("Follow request sent:", response);
+      // Reload connections and outgoing requests to update UI
+      const [connectionsData, outgoingReqs] = await Promise.all([
+        FollowService.listConnections(),
+        FollowService.listRequests("sent"),
+      ]);
+      setFollowing(connectionsData.following);
+      setFollowers(connectionsData.followers);
+      setOutgoingRequests(outgoingReqs);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to send follow request";
+      console.error("Follow back error:", errorMsg);
+      setError(errorMsg);
+    }
+  }
+
+  async function cancelFollowRequest(requestId: string) {
+    try {
+      setError("");
+      await FollowService.unfollow(requestId);
+      console.log("Follow request cancelled");
+      // Reload outgoing requests to update UI
+      const outgoingReqs = await FollowService.listRequests("sent");
+      setOutgoingRequests(outgoingReqs);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to cancel follow request";
+      console.error("Cancel request error:", errorMsg);
+      setError(errorMsg);
+    }
+  }
+
+  // Create a set of user IDs the logged-in user is following
+  const followingIds = new Set(following.map((f) => f.user.id));
+
+  // Create a set of user IDs the logged-in user has sent follow requests to (pending)
+  const pendingFollowIds = new Set(
+    outgoingRequests?.map((r) => r.followingId) || []
+  );
 
   if (!user) return null;
 
@@ -360,37 +422,79 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div className='space-y-4'>
-                    {followers.map((connection) => (
-                      <div
-                        key={connection.id}
-                        className='flex items-center justify-between p-4 bg-[var(--card)] rounded-md border border-black/10'
-                      >
-                        <div className='flex items-center gap-3'>
-                          <div className='w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-rose-600 flex items-center justify-center flex-shrink-0'>
-                            <span className='text-lg font-bold text-white'>
-                              {connection.user.displayName
-                                ? connection.user.displayName
-                                    .charAt(0)
-                                    .toUpperCase()
-                                : connection.user.email.charAt(0).toUpperCase()}
-                            </span>
+                    {followers.map((connection) => {
+                      const isFollowingBack = followingIds.has(
+                        connection.user.id
+                      );
+                      const hasPendingRequest = pendingFollowIds.has(
+                        connection.user.id
+                      );
+                      return (
+                        <div
+                          key={connection.id}
+                          className='flex items-center justify-between p-4 bg-[var(--card)] rounded-md border border-black/10'
+                        >
+                          <div className='flex items-center gap-3'>
+                            <div className='w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-rose-600 flex items-center justify-center flex-shrink-0'>
+                              <span className='text-lg font-bold text-white'>
+                                {connection.user.displayName
+                                  ? connection.user.displayName
+                                      .charAt(0)
+                                      .toUpperCase()
+                                  : connection.user.email
+                                      .charAt(0)
+                                      .toUpperCase()}
+                              </span>
+                            </div>
+                            <div>
+                              <p className='font-semibold text-[var(--text)]'>
+                                {connection.user.displayName ||
+                                  connection.user.email.split("@")[0]}
+                              </p>
+                              <p className='text-sm text-[var(--muted)]'>
+                                {connection.user.email}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className='font-semibold text-[var(--text)]'>
-                              {connection.user.displayName ||
-                                connection.user.email.split("@")[0]}
+                          <div className='flex flex-col items-end gap-2'>
+                            <p className='text-xs text-[var(--muted)]'>
+                              Following since{" "}
+                              {new Date(connection.since).toLocaleDateString()}
                             </p>
-                            <p className='text-sm text-[var(--muted)]'>
-                              {connection.user.email}
-                            </p>
+                            {!isFollowingBack && !hasPendingRequest && (
+                              <button
+                                onClick={() =>
+                                  followBackUser(connection.user.id)
+                                }
+                                className='bg-[var(--accent)] text-[#faf6f0] font-medium px-3 py-1 rounded-md hover:bg-[var(--accent-hover)] transition text-sm'
+                              >
+                                Follow Back
+                              </button>
+                            )}
+                            {!isFollowingBack && hasPendingRequest && (
+                              <button
+                                onClick={() => {
+                                  const pendingReq = outgoingRequests?.find(
+                                    (r) => r.followingId === connection.user.id
+                                  );
+                                  if (pendingReq) {
+                                    cancelFollowRequest(pendingReq.id);
+                                  }
+                                }}
+                                className='bg-[var(--error)] text-[#faf6f0] font-medium px-3 py-1 rounded-md hover:bg-[var(--error)]/80 transition text-sm'
+                              >
+                                Cancel Request
+                              </button>
+                            )}
+                            {isFollowingBack && (
+                              <span className='text-[var(--accent)] text-xs font-medium'>
+                                Following back
+                              </span>
+                            )}
                           </div>
                         </div>
-                        <p className='text-xs text-[var(--muted)]'>
-                          Following since{" "}
-                          {new Date(connection.since).toLocaleDateString()}
-                        </p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -432,10 +536,18 @@ export default function ProfilePage() {
                             </p>
                           </div>
                         </div>
-                        <p className='text-xs text-[var(--muted)]'>
-                          Following since{" "}
-                          {new Date(connection.since).toLocaleDateString()}
-                        </p>
+                        <div className='flex flex-col items-end gap-2'>
+                          <p className='text-xs text-[var(--muted)]'>
+                            Following since{" "}
+                            {new Date(connection.since).toLocaleDateString()}
+                          </p>
+                          <button
+                            onClick={() => unfollowUser(connection.id)}
+                            className='bg-[var(--error)] text-[#faf6f0] font-medium px-3 py-1 rounded-md hover:bg-[var(--error)]/80 transition text-sm'
+                          >
+                            Unfollow
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
   },
   FOLLOWS: {
     BASE: "/api/follows",
+    BY_ID: (id: string) => `/api/follows/${id}`,
     CONNECTIONS: "/api/follows/connections",
     REQUEST: "/api/follows/request",
     REQUESTS: "/api/follows/requests",

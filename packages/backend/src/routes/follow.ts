@@ -257,6 +257,49 @@ router.get("/connections", async (req: AuthRequest, res) => {
   }
 });
 
+// Unfollow a user (remove follow relationship)
+router.delete("/:id", async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res
+        .status(HTTP_STATUS.UNAUTHORIZED)
+        .json({ error: "Unauthorized" });
+    }
+
+    const { id } = req.params;
+    const follow = await prisma.follow.findUnique({
+      where: { id },
+    });
+
+    if (!follow) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ error: "Follow relationship not found" });
+    }
+
+    // Only the follower can unfollow
+    if (follow.followerId !== userId) {
+      return res
+        .status(HTTP_STATUS.FORBIDDEN)
+        .json({ error: "You cannot unfollow this user" });
+    }
+
+    await prisma.follow.delete({
+      where: { id },
+    });
+
+    return res.status(HTTP_STATUS.OK).json({
+      message: "Successfully unfollowed",
+    });
+  } catch (err) {
+    console.error("Failed to unfollow user", err);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to unfollow user" });
+  }
+});
+
 // Feed of public posts from accepted followings
 router.get("/feed", async (req: AuthRequest, res) => {
   try {

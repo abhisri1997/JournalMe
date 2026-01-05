@@ -289,6 +289,19 @@ export class FollowService {
     return res.json();
   }
 
+  static async unfollow(id: string) {
+    const res = await authFetch(API_ENDPOINTS.FOLLOWS.BY_ID(id), {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Failed to unfollow");
+    }
+
+    return res.json();
+  }
+
   static async fetchFeed(): Promise<FeedEntry[]> {
     const res = await authFetch(API_ENDPOINTS.FOLLOWS.FEED);
     if (!res.ok) {

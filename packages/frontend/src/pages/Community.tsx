@@ -117,6 +117,16 @@ export default function CommunityPage() {
     }
   }
 
+  async function unfollow(id: string) {
+    try {
+      setError(null);
+      await FollowService.unfollow(id);
+      await Promise.all([loadConnections(), loadUsers(search)]);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
+
   function formatUser(u: { email: string; displayName?: string | null }) {
     return u.displayName ? `${u.displayName} (${u.email})` : u.email;
   }
@@ -210,11 +220,15 @@ export default function CommunityPage() {
                     </button>
                   )}
 
-                  {user.outgoingStatus === "ACCEPTED" && (
-                    <span className='text-[var(--accent)] text-sm'>
-                      Following
-                    </span>
-                  )}
+                  {user.outgoingStatus === "ACCEPTED" &&
+                    user.outgoingFollowId && (
+                      <button
+                        onClick={() => unfollow(user.outgoingFollowId!)}
+                        className='bg-[var(--error)] text-[#faf6f0] font-medium'
+                      >
+                        Unfollow
+                      </button>
+                    )}
                 </div>
               </div>
             ))}
