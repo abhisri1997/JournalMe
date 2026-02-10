@@ -3,6 +3,7 @@ import { FollowStatus } from "@prisma/client";
 import prisma from "../db";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { HTTP_STATUS } from "../constants";
+import { eventBus, EventType } from "../events/EventBus";
 
 const router = express.Router();
 
@@ -80,6 +81,24 @@ router.post("/request", async (req: AuthRequest, res) => {
           },
         });
 
+    // 🔥 Publish event instead of creating notification directly
+    // This decouples business logic from notifications (Instagram pattern)
+    const requester = await prisma.user.findUnique({
+      where: { id: requesterId },
+      select: { username: true },
+    });
+
+    eventBus.publish({
+      type: EventType.FOLLOW_REQUEST_CREATED,
+      timestamp: new Date(),
+      data: {
+        followId: follow.id,
+        followerId: requesterId,
+        followingId: targetUserId,
+        followerUsername: requester?.username,
+      },
+    });
+
     return res.status(HTTP_STATUS.CREATED).json({
       message: "Follow request sent",
       follow,
@@ -126,6 +145,23 @@ router.post("/:id/accept", async (req: AuthRequest, res) => {
     const updated = await prisma.follow.update({
       where: { id },
       data: { status: FollowStatus.ACCEPTED },
+    });
+
+    // 🔥 Publish event for follow acceptance
+    const accepter = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true },
+    });
+
+    eventBus.publish({
+      type: EventType.FOLLOW_REQUEST_ACCEPTED,
+      timestamp: new Date(),
+      data: {
+        followId: follow.id,
+        followerId: follow.followerId,
+        followingId: userId,
+        acceptedByUsername: accepter?.username,
+      },
     });
 
     return res.status(HTTP_STATUS.OK).json({ follow: updated });

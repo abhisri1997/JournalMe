@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import fs from "fs";
 import { AuthRequest } from "../middleware/auth";
+import { eventBus, EventType } from "../events/EventBus";
 
 const router = express.Router();
 
@@ -89,6 +90,26 @@ router.post(
       });
 
       console.log("Entry created:", created);
+
+      // 🔥 Publish event for new journal (will notify followers if public)
+      if (isPublic) {
+        const user = await prisma.user.findUnique({
+          where: { id: req.user.id },
+          select: { username: true },
+        });
+
+        eventBus.publish({
+          type: EventType.JOURNAL_CREATED,
+          timestamp: new Date(),
+          data: {
+            journalId: created.id,
+            userId: req.user.id,
+            username: user?.username,
+            isPublic: created.isPublic,
+          },
+        });
+      }
+
       return res.status(201).json(created);
     } catch (err) {
       console.error("Error creating entry:", err);
