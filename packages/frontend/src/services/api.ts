@@ -79,6 +79,16 @@ export interface FeedEntry {
   isPublic: boolean;
 }
 
+export interface Notification {
+  id: string;
+  userId: string;
+  type: string;
+  message: string;
+  relatedId: string | null;
+  read: boolean;
+  createdAt: string;
+}
+
 export class AuthService {
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const res = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
@@ -331,5 +341,56 @@ export class FollowService {
       throw new Error("Failed to load feed");
     }
     return res.json();
+  }
+}
+
+export class NotificationService {
+  static async getNotifications(unreadOnly = false): Promise<Notification[]> {
+    const url = unreadOnly
+      ? `${API_ENDPOINTS.NOTIFICATIONS.BASE}?unreadOnly=true`
+      : API_ENDPOINTS.NOTIFICATIONS.BASE;
+
+    const res = await authFetch(url);
+    if (!res.ok) {
+      throw new Error("Failed to load notifications");
+    }
+    const data = await res.json();
+    return data.notifications || [];
+  }
+
+  static async getUnreadCount(): Promise<number> {
+    const res = await authFetch(API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT);
+    if (!res.ok) {
+      throw new Error("Failed to load unread count");
+    }
+    const data = await res.json();
+    return data.count;
+  }
+
+  static async markAsRead(id: string): Promise<void> {
+    const res = await authFetch(API_ENDPOINTS.NOTIFICATIONS.READ(id), {
+      method: "PATCH",
+    });
+    if (!res.ok) {
+      throw new Error("Failed to mark notification as read");
+    }
+  }
+
+  static async markAllAsRead(): Promise<void> {
+    const res = await authFetch(API_ENDPOINTS.NOTIFICATIONS.READ_ALL, {
+      method: "PATCH",
+    });
+    if (!res.ok) {
+      throw new Error("Failed to mark all notifications as read");
+    }
+  }
+
+  static async deleteNotification(id: string): Promise<void> {
+    const res = await authFetch(API_ENDPOINTS.NOTIFICATIONS.BY_ID(id), {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      throw new Error("Failed to delete notification");
+    }
   }
 }

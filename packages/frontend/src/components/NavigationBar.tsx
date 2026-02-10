@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import ProfileMenu from "./ProfileMenu";
 import ThemeToggle from "./ThemeToggle";
+import NotificationBell from "./NotificationBell";
 import { HomeIcon, JournalIcon, UserIcon } from "./Icons";
 
 interface NavigationBarProps {
@@ -23,7 +24,14 @@ export default function NavigationBar({
           <span className='logo-text'>JournalMe</span>
         </div>
         <div className='mobile-top-actions'>
-          {isAuthenticated ? <ProfileMenu /> : <ThemeToggle />}
+          {isAuthenticated ? (
+            <>
+              <NotificationBell />
+              <ProfileMenu />
+            </>
+          ) : (
+            <ThemeToggle />
+          )}
         </div>
       </div>
 
@@ -77,6 +85,7 @@ export default function NavigationBar({
             Menu
           </button>
           {!isAuthenticated && <ThemeToggle />}
+          {isAuthenticated && <NotificationBell />}
           {isAuthenticated && <ProfileMenu />}
         </div>
       </nav>

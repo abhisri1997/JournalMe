@@ -24,6 +24,13 @@ export const API_ENDPOINTS = {
     REJECT: (id: string) => `/api/follows/${id}/reject`,
     FEED: "/api/follows/feed",
   },
+  NOTIFICATIONS: {
+    BASE: "/api/notifications",
+    BY_ID: (id: string) => `/api/notifications/${id}`,
+    READ: (id: string) => `/api/notifications/${id}/read`,
+    UNREAD_COUNT: "/api/notifications/unread-count",
+    READ_ALL: "/api/notifications/read-all",
+  },
 };
 
 // Storage keys
