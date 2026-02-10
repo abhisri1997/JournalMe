@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "../components/NavigationBar";
 import UserAvatar from "../components/UserAvatar";
 import PostModal from "../components/PostModal";
 import { useAuth } from "../hooks";
+import { useFollowRequests } from "../contexts/FollowRequestContext";
 import {
   JournalService,
   FollowService,
@@ -25,6 +26,7 @@ type Tab = "posts" | "followers" | "following";
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { refreshFollowRequests } = useFollowRequests();
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("posts");
@@ -54,40 +56,46 @@ export default function ProfilePage() {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    const loadProfileData = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const [entriesResponse, connectionsData, outgoingReqs] =
-          await Promise.all([
-            JournalService.fetchEntries(20, 0),
-            FollowService.listConnections(),
-            FollowService.listRequests("sent"),
-          ]);
-        const entries = Array.isArray(entriesResponse)
-          ? entriesResponse
-          : entriesResponse.entries;
-        setPosts(entries);
-        setHasMorePosts(
-          Array.isArray(entriesResponse) ? false : entriesResponse.hasMore
-        );
-        setPostsSkip(20);
-        setFollowers(connectionsData.followers);
-        setFollowing(connectionsData.following);
-        setOutgoingRequests(outgoingReqs);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load profile data"
-        );
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user) loadProfileData();
+  const loadProfileData = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    setError("");
+    try {
+      const [entriesResponse, connectionsData, outgoingReqs] =
+        await Promise.all([
+          JournalService.fetchEntries(20, 0),
+          FollowService.listConnections(),
+          FollowService.listRequests("sent"),
+        ]);
+      const entries = Array.isArray(entriesResponse)
+        ? entriesResponse
+        : entriesResponse.entries;
+      setPosts(entries);
+      setHasMorePosts(
+        Array.isArray(entriesResponse) ? false : entriesResponse.hasMore
+      );
+      setPostsSkip(20);
+      setFollowers(connectionsData.followers);
+      setFollowing(connectionsData.following);
+      setOutgoingRequests(outgoingReqs);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load profile data");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    if (user) loadProfileData();
+  }, [user, loadProfileData]);
+
+  // Refresh follow state when real-time follow events arrive
+  useEffect(() => {
+    const handler = () => loadProfileData();
+    window.addEventListener("follow-request-updated", handler);
+    return () => window.removeEventListener("follow-request-updated", handler);
+  }, [loadProfileData]);
 
   async function unfollowUser(id: string) {
     try {
@@ -114,6 +122,8 @@ export default function ProfilePage() {
       setFollowing(connectionsData.following);
       setFollowers(connectionsData.followers);
       setOutgoingRequests(outgoingReqs);
+      // Trigger global refresh for Community page
+      refreshFollowRequests();
     } catch (err) {
       const errorMsg =
         err instanceof Error ? err.message : "Failed to send follow request";
@@ -130,6 +140,8 @@ export default function ProfilePage() {
       // Reload outgoing requests to update UI
       const outgoingReqs = await FollowService.listRequests("sent");
       setOutgoingRequests(outgoingReqs);
+      // Trigger global refresh for Community page
+      refreshFollowRequests();
     } catch (err) {
       const errorMsg =
         err instanceof Error ? err.message : "Failed to cancel follow request";

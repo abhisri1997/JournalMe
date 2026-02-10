@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import NavigationBar from "../components/NavigationBar";
 import { useAuth } from "../hooks";
+import { useNotifications } from "../contexts/NotificationContext";
+import { useFollowRequests } from "../contexts/FollowRequestContext";
 import {
   DiscoveredUser,
   FollowConnection,
@@ -13,6 +15,8 @@ type RequestDirection = "sent" | "received";
 
 export default function CommunityPage() {
   const { isAuthenticated } = useAuth();
+  const { refreshNotifications } = useNotifications();
+  const { refreshCount } = useFollowRequests();
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [discover, setDiscover] = useState<DiscoveredUser[]>([]);
@@ -25,14 +29,25 @@ export default function CommunityPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Initial load on mount
   useEffect(() => {
-    // Do not pre-load users for privacy; load other data only
     Promise.all([
       loadRequests("received"),
       loadRequests("sent"),
       loadConnections(),
     ]);
   }, []);
+
+  // Refresh when follow request state changes (accept/reject from notification)
+  useEffect(() => {
+    if (refreshCount > 0) {
+      Promise.all([
+        loadRequests("received"),
+        loadRequests("sent"),
+        loadConnections(),
+      ]);
+    }
+  }, [refreshCount]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -91,7 +106,11 @@ export default function CommunityPage() {
     try {
       setError(null);
       await FollowService.sendRequest(targetUserId);
-      await Promise.all([loadRequests("sent"), loadUsers(search)]);
+      await Promise.all([
+        loadRequests("sent"),
+        loadUsers(search),
+        refreshNotifications(),
+      ]);
     } catch (err) {
       setError((err as Error).message);
     }
@@ -101,7 +120,11 @@ export default function CommunityPage() {
     try {
       setError(null);
       await FollowService.acceptRequest(id);
-      await Promise.all([loadRequests("received"), loadConnections()]);
+      await Promise.all([
+        loadRequests("received"),
+        loadConnections(),
+        refreshNotifications(),
+      ]);
     } catch (err) {
       setError((err as Error).message);
     }
@@ -112,6 +135,16 @@ export default function CommunityPage() {
       setError(null);
       await FollowService.rejectRequest(id);
       await Promise.all([loadRequests("received"), loadUsers(search)]);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
+
+  async function cancelRequest(id: string) {
+    try {
+      setError(null);
+      await FollowService.unfollow(id);
+      await Promise.all([loadRequests("sent"), loadUsers(search)]);
     } catch (err) {
       setError((err as Error).message);
     }
@@ -281,11 +314,28 @@ export default function CommunityPage() {
               </div>
             )}
             {outgoing.map((req) => (
-              <div key={req.id} className='py-1.5'>
-                {req.following ? formatUser(req.following) : req.followingId}
-                <div className='text-sm text-[var(--muted)]'>
-                  Status: {req.status}
+              <div
+                key={req.id}
+                className='flex justify-between items-center py-1.5'
+              >
+                <div>
+                  <div>
+                    {req.following
+                      ? formatUser(req.following)
+                      : req.followingId}
+                  </div>
+                  <div className='text-sm text-[var(--muted)]'>
+                    Status: {req.status}
+                  </div>
                 </div>
+                {req.status === "PENDING" && (
+                  <button
+                    onClick={() => cancelRequest(req.id)}
+                    className='bg-[var(--error)] text-[#faf6f0] font-medium px-3 py-1 rounded-md hover:bg-[var(--error)]/80 transition text-sm'
+                  >
+                    Cancel
+                  </button>
+                )}
               </div>
             ))}
           </div>
